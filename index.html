@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Counter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Le Creuset</h1>
+            <h2>Stock Count</h2>
+        </header>
+        <section id="inputArea">
+            <input type="text" id="spreadsheetData" placeholder="Paste Spreadsheet Data Here">
+            <button id="submit">Submit</button>
+        </section>
+        <section id="outputArea">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th>Quantity</th>
+                        <th>Checked</th>
+                    </tr>
+                </thead>
+                <tbody id="output">
+                    <!-- Output will go here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+<script src="index.js"></script>
+</html>
