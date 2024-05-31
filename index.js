@@ -13,9 +13,9 @@ function eventHandler() {
     const itemName = spreadsheetSplit[i];
     if (itemName != 'Item Description') {
       if (itemName in itemObject) {
-        itemObject[itemName]++;
+        itemObject[itemName] -= spreadsheetSplit[i + 2];
       } else {
-        itemObject[itemName] = 1;
+        itemObject[itemName] = -spreadsheetSplit[i + 2];
       }
     }
   }
@@ -24,28 +24,30 @@ function eventHandler() {
   let staggeredRow = true;
   
   for (const key of keyArray) {
-    const row = document.createElement('tr');
-    row.className =  staggeredRow ? 'even': 'odd';
-
-    const rowName = document.createElement('td');
-    const name = document.createTextNode(key);
-    rowName.appendChild(name);
-    
-    const rowQuantity = document.createElement('td');
-    const quantity = document.createTextNode(itemObject[key]);
-    rowQuantity.appendChild(quantity);
-
-    const checkBoxElement = document.createElement('td');
-    const checkBox = document.createElement('input');
-    checkBox.type = 'checkbox';
-    checkBoxElement.appendChild(checkBox);
-
-    row.appendChild(rowName);
-    row.appendChild(rowQuantity);
-    row.appendChild(checkBoxElement);
-
-    table.appendChild(row);
-    staggeredRow = !staggeredRow;
+    if (itemObject[key] > 0) {
+      const row = document.createElement('tr');
+      row.className =  staggeredRow ? 'even': 'odd';
+      
+      const rowName = document.createElement('td');
+      const name = document.createTextNode(key);
+      rowName.appendChild(name);
+      
+      const rowQuantity = document.createElement('td');
+      const quantity = document.createTextNode(itemObject[key]);
+      rowQuantity.appendChild(quantity);
+      
+      const checkBoxElement = document.createElement('td');
+      const checkBox = document.createElement('input');
+      checkBox.type = 'checkbox';
+      checkBoxElement.appendChild(checkBox);
+      
+      row.appendChild(rowName);
+      row.appendChild(rowQuantity);
+      row.appendChild(checkBoxElement);
+      
+      table.appendChild(row);
+      staggeredRow = !staggeredRow;
+    }
   }
 }
 
