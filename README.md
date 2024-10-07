@@ -1,9 +1,14 @@
-[# Le Creuset Stock Data Parser 📦](https://derek-walton.github.io/Le-Creuset-Stock-Counter/)
+# Le Creuset Stock Data Parser 📦
 
-A data parser used for the Le Creuset Portsmouth team to easily read / quantify the missing stock needed for re-ordering every day.
+A data parser used for the Le Creuset Portsmouth team to easily read / quantify the items needed for re-ordering stockevery day.
+
+[Link](https://derek-walton.github.io/Le-Creuset-Stock-Counter/)
 
 ## Table of contents
 - [Overview](#overview)
+- [The Problem](#the-problem)
+- [The Solution](#the-solution)
+- [Case Examples](#case-examples)
 
 ## Overview
 
