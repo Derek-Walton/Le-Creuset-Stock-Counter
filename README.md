@@ -47,4 +47,4 @@ Test case data available [here](test-case.txt)
 
 ### Note
 
-As this was only a temporary solution that would last a few weeks, there wasn't much of an importance to optimise the parser and polish the user interface.
+As this was only a temporary solution that would last a few weeks, there wasn't much of an importance to optimise the parser and polish the user interface, as the main focus was to get a working prototype up and running for the team.
