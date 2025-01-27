@@ -13,56 +13,68 @@ const miscellaneous = document.querySelector('#miscellaneous');
 const seasonal = document.querySelector('#seasonal');
 const all = document.querySelector('#all');
 
-const alphabetical = document.querySelector('#alphabetical');
-const quantity = document.querySelector('#quantitySort');
+const alphabeticalButton = document.querySelector('#alphabeticalButton');
+const quantityButton = document.querySelector('#quantityButton');
+const totalCostButton = document.querySelector('#totalCostButton');
 
-const totalQuantity = document.querySelector('#totalQuantity');
-const totalCost = document.querySelector('#totalCost');
-const avgCost = document.querySelector('#avgCost');
-const mostPopular = document.querySelector('#mostPopular');
-const leastPopular = document.querySelector('#leastPopular');
+const totalQuantityStat = document.querySelector('#totalQuantity');
+const totalCostStat = document.querySelector('#totalCost');
+const avgCostStat = document.querySelector('#avgCost');
+const mostPopularStat = document.querySelector('#mostPopular');
+const leastPopularStat = document.querySelector('#leastPopular');
 
-let productObject = {};
+let productArray = [];
 
 let alphabeticalToggle = false;
 let quantityToggle = false;
+let totalCostToggle = false;
 let originalNames;
 
 function initObject() {
   clearTable();
-  productObject = {};
   outputArea.style.display = 'table';
   const spreadsheetData = input.value;
-  input.value = ''
-  const spreadsheetSplit = spreadsheetData.split('\t')
+  input.value = '';
+  const spreadsheetSplit = spreadsheetData.split('\t');
   
   for (let i = 2; i < spreadsheetSplit.length; i += 5) {
     const productName = spreadsheetSplit[i];    
-    if (productName != 'Product Description') {
-      if (productName in productObject) {
-        productObject[productName] -= spreadsheetSplit[i + 2];
+    const productPrice = -parseFloat(spreadsheetSplit[i + 3].split('\'')[0]);
+    const productQuantity = -spreadsheetSplit[i + 2];
+    if (productName != 'Item Description') {
+      if (productArray.find(product => product.itemDescription == productName)) {
+        productArray.find(product => product.itemDescription == productName).totalCost += productPrice;
+        productArray.find(product => product.itemDescription == productName).quantity += productQuantity;
       } else {
-        productObject[productName] = -spreadsheetSplit[i + 2];
+        productArray.push({ 
+          itemDescription: productName, 
+          quantity: productQuantity, 
+          totalCost: productPrice
+        })
       }
     }
   }
-  return productObject;
+  return productArray;
 }
 
 function createTables() {
   let staggeredRow = true;
-  for (const key of productNames) {
-    if (productObject[key] > 0) {
+  productArray.forEach(product => {
+    if (product.quantity > 0) {
       const row = document.createElement('tr');
       row.className =  staggeredRow ? 'even': 'odd';
       
       const rowName = document.createElement('td');
-      const name = document.createTextNode(key);
+      const name = document.createTextNode(product.itemDescription);
       rowName.appendChild(name);
       
       const rowQuantity = document.createElement('td');
-      const quantity = document.createTextNode(productObject[key]);
+      const quantity = document.createTextNode(product.quantity);
       rowQuantity.appendChild(quantity);
+      
+      const rowTotalCost = document.createElement('td');
+      const totalCost = document.createTextNode(product.totalCost.toFixed(2));
+      rowTotalCost.appendChild(totalCost);
       
       const checkBoxElement = document.createElement('td');
       const checkBox = document.createElement('input');
@@ -71,12 +83,14 @@ function createTables() {
       
       row.appendChild(rowName);
       row.appendChild(rowQuantity);
+      row.appendChild(rowTotalCost);
       row.appendChild(checkBoxElement);
       
       table.appendChild(row);
       staggeredRow = !staggeredRow;
+      updateDashboard()
     }
-  }  
+  });
 }
 
 function clearTable() {
@@ -87,22 +101,31 @@ function clearTable() {
 
 function initTable(){
   initObject();
-  productNames = Object.keys(productObject).sort();
-  originalNames = productNames;
+  originalArray = productArray;
+  productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) ? 1 : (product1.itemDescription < product2.itemDescription) ? -1 : 0);
   createTables();
 }
 
-// function updateDashboard() {
-//   productNames
-// }
+function updateDashboard() {
+  let totalQuantity = 0;
+  let totalCost = 0;
+  productArray.forEach(product => {
+    totalQuantity += product.quantity
+    totalCost += product.totalCost
+  });
+  let avgCost = (totalCost / totalQuantity).toFixed(2);
+  totalQuantityStat.innerText = totalQuantity.toLocaleString('en') + ' Units';
+  totalCostStat.innerText = '£' + totalCost.toLocaleString('en');
+  avgCostStat.innerText = '£' + avgCost;
+}
 
 
 function castIronEventHandler (){
   clearTable();
-  productNames = originalNames
-  let newProductNames = [];
-  productNames.forEach(product => {
-    let lowerCaseProduct = product.toLowerCase();
+  productArray = originalArray
+  let newProductArray = [];
+  productArray.forEach(product => {
+    let lowerCaseProduct = product.itemDescription.toLowerCase();
     if (lowerCaseProduct.startsWith('rnd cass') || 
         lowerCaseProduct.startsWith('evo rnd cass') || 
         lowerCaseProduct.startsWith('ovl cass') || 
@@ -121,100 +144,106 @@ function castIronEventHandler (){
         lowerCaseProduct.startsWith('soup pot') || 
         lowerCaseProduct.includes('skillet')
       ) {
-        newProductNames.push(product);
+        newProductArray.push(product);
     }
-  });
-  productNames = newProductNames;
+  });  
+  productArray = newProductArray;
   createTables();
 }
+
 function triplyEventHandler (){
   clearTable();
-  productNames = originalNames
-  let newProductNames = [];
-  productNames.forEach(product => {
-    let lowerCaseProduct = product.toLowerCase();
+  productArray = originalArray
+  let newProductArray = [];
+  productArray.forEach(product => {
+    let lowerCaseProduct = product.itemDescription.toLowerCase();
     if (lowerCaseProduct.includes('3ply')) {
-        newProductNames.push(product);
+      newProductArray.push(product);
     }
   });
-  productNames = newProductNames;
+  productArray = newProductArray;
   createTables();
 }
+
 function tnsEventHandler (){
   clearTable();
-  productNames = originalNames
-  let newProductNames = [];
-  productNames.forEach(product => {
-    let lowerCaseProduct = product.toLowerCase();
+  productArray = originalArray
+  let newProductArray = [];
+  productArray.forEach(product => {
+    let lowerCaseProduct = product.itemDescription.toLowerCase();
     if (lowerCaseProduct.includes('tns')) {
-        newProductNames.push(product);
+      newProductArray.push(product);
     }
   });
-  productNames = newProductNames;
+  productArray = newProductArray;
   createTables();
 }
+
 function stonewareEventHandler (){
   clearTable();
-  productNames = originalNames
-  let newProductNames = [];
-  productNames.forEach(product => {
-    let lowerCaseProduct = product.toLowerCase();
+  productArray = originalArray
+  let newProductArray = [];
+  productArray.forEach(product => {
+    let lowerCaseProduct = product.itemDescription.toLowerCase();
     if (false) {
-        newProductNames.push(product);
+      newProductArray.push(product);
     }
   });
-  productNames = newProductNames;
+  productArray = newProductArray;
   createTables();
 }
+
 function mugsEventHandler (){
   clearTable();
-  productNames = originalNames
-  let newProductNames = [];
-  productNames.forEach(product => {
-    let lowerCaseProduct = product.toLowerCase();
+  productArray = originalArray
+  let newProductArray = [];
+  productArray.forEach(product => {
+    let lowerCaseProduct = product.itemDescription.toLowerCase();
     if (lowerCaseProduct.startsWith('lc mug') || 
         lowerCaseProduct.startsWith('lc cappuccino') || 
         lowerCaseProduct.startsWith('lc espresso') || 
         lowerCaseProduct.startsWith('lc grand mug')
       ) {
-        newProductNames.push(product);
+        newProductArray.push(product);
     }
   });
-  productNames = newProductNames;
+  productArray = newProductArray;
   createTables();
 }
+
 function miscellaneousEventHandler (){
 
 }
+
 function seasonalEventHandler (){
 
 }
+
 function allEventHandler (){
   clearTable();
-  productNames = originalNames;
+  productArray = originalArray;
   createTables();
 }
 
 function alphabeticalSort(){
   clearTable();
-  productNames = alphabeticalToggle ? productNames.sort() : productNames.sort().reverse();
+  alphabeticalToggle ? productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) ? 1 : (product1.itemDescription < product2.itemDescription) ? -1 : 0) : productArray.sort((product1, product2) => (product1.itemDescription < product2.itemDescription) ? 1 : (product1.itemDescription > product2.itemDescription) ? -1 : 0);
   createTables();
   alphabeticalToggle = !alphabeticalToggle;
 }
 
 function quantitySort(){
   clearTable();
-  allProductNamesSorted = quantityToggle ? Object.keys(productObject).sort(function(a,b){return productObject[a]-productObject[b]}) : Object.keys(productObject).sort(function(a,b){return productObject[b]-productObject[a]});
-  let sortedProductNames = [];
-  allProductNamesSorted.forEach(product => {
-    if (productNames.includes(product)){
-      sortedProductNames.push(product);
-    }
-  });
-  productNames = sortedProductNames;
-  
+  quantityToggle ? productArray.sort((product1, product2) => (product1.quantity < product2.quantity) ? 1 : (product1.quantity > product2.quantity) ? -1 : 0) : productArray.sort((product1, product2) => (product1.quantity > product2.quantity) ? 1 : (product1.quantity < product2.quantity) ? -1 : 0);  
   createTables();
   quantityToggle = !quantityToggle;
+}
+
+function totalCostSort(){
+  clearTable();
+  totalCostToggle ? productArray.sort((product1, product2) => (product1.totalCost < product2.totalCost) ? 1 : (product1.totalCost > product2.totalCost) ? -1 : 0) : productArray.sort((product1, product2) => (product1.totalCost > product2.totalCost) ? 1 : (product1.totalCost < product2.totalCost) ? -1 : 0);  
+  createTables();
+  totalCostToggle = !totalCostToggle;
 }
 
 submit.addEventListener('click', initTable);
@@ -227,5 +256,6 @@ miscellaneous.addEventListener('click', miscellaneousEventHandler);
 seasonal.addEventListener('click', seasonalEventHandler);
 all.addEventListener('click', allEventHandler);
 
-alphabetical.addEventListener('click', alphabeticalSort);
-quantity.addEventListener('click', quantitySort);
+alphabeticalButton.addEventListener('click', alphabeticalSort);
+quantityButton.addEventListener('click', quantitySort);
+totalCostButton.addEventListener('click', totalCostSort);

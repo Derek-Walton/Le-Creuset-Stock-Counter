@@ -90,11 +90,27 @@ main {
   border: solid;
   flex-grow: 1;
   max-height: 50vh;
+  padding: 1rem;
+}
+
+.dashboardItem {
+  padding-bottom: 1rem;
+}
+
+.dashboardItem > h3 {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.dashboardItem > p {
+  font-size: 24px;
 }
 
 #bottom {
   border: solid;
   flex-grow: 1;
+
+  padding: 1rem;
 }
 
 .box {
@@ -137,6 +153,7 @@ textarea {
   padding: 0.5rem 1rem;
   cursor: pointer;
   transition: 0.2s;
+  font-size: 14px;
 }
 
 #button-container > button:hover {
