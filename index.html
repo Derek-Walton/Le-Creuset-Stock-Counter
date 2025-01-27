@@ -7,28 +7,91 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <header>
+        <h2>Filters</h2>
+        <button class="filter" id="castIron">Cast Iron</button>
+        <button class="filter" id="triply">3PLY</button>
+        <button class="filter" id="tns">TNS</button>
+        <button class="filter" id="stoneware">Stoneware</button>
+        <button class="filter" id="mugs">Mugs</button>
+        <button class="filter" id="miscellaneous">Miscellaneous</button>
+        <button class="filter" id="seasonal">Seasonal</button>
+        <button class="filter" id="all">All</button>
+    </header>
     <main>
-        <header>
-            <h1>Le Creuset</h1>
-            <h2>Stock Count</h2>
-        </header>
-        <section id="inputArea">
-            <input type="text" id="spreadsheetData" placeholder="Paste Spreadsheet Data Here">
-            <button id="submit">Submit</button>
+        <section id="left" class="box">
+            <section id="inputArea">
+                <textarea id="spreadsheetData" placeholder="Paste Spreadsheet Data Here"></textarea>
+                <div id="button-container">
+                    <button id="submit">Submit</button>
+                    <button id="alphabetical">Alphabetical</button>
+                    <button id="quantitySort">Quantity</button>
+                </div>
+            </section>
+            <section id="outputArea">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Description</th>
+                            <th>Quantity</th>
+                            <th>Ordered</th>
+                        </tr>
+                    </thead>
+                    <tbody id="output">
+                        <!-- Output will go here -->
+                    </tbody>
+                </table>
+            </section>
         </section>
-        <section id="outputArea">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item Description</th>
-                        <th>Quantity</th>
-                        <th>Checked</th>
-                    </tr>
-                </thead>
-                <tbody id="output">
-                    <!-- Output will go here -->
-                </tbody>
-            </table>
+
+        <section id="right">
+            <section id="top" class="box">
+                <h2>Dashboard</h2>
+                <div class="dashboardItem">
+                    <h3>Total Quantity</h3>
+                    <p id="totalQuantity">84 Units</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>Total Cost</h3>
+                    <p id="totalCost">£1,390.98</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>Average Cost</h3>
+                    <p id="avgCost">£230.99</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>Most Popular</h3>
+                    <p id="mostPopular">LC Mug Volcanic</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>Least Popular</h3>
+                    <p id="leastPopular">Wine Sleeve</p>
+                </div>
+            </section>
+
+            <section id="bottom" class="box">
+                <h2>Total Percentage</h2>
+                <div class="dashboardItem">
+                    <h3>Cast Iron</h3>
+                    <p>15%</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>3PLY</h3>
+                    <p>10%</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>TNS</h3>
+                    <p>20%</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>Stoneware</h3>
+                    <p>40%</p>
+                </div>
+                <div class="dashboardItem">
+                    <h3>Miscellaneous</h3>
+                    <p>10%</p>
+                </div>
+            </section>
         </section>
     </main>
 </body>
