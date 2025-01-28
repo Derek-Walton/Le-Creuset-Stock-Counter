@@ -21,7 +21,7 @@
     <main>
         <section id="left" class="box">
             <section id="inputArea">
-                <textarea id="spreadsheetData" placeholder="Paste Spreadsheet Data Here"></textarea>
+                <textarea id="spreadsheetData" placeholder="Paste Item Data Here"></textarea>
                 <div id="button-container">
                     <button id="submit">Submit</button>
                     <button id="alphabeticalButton">Alphabetical</button>
@@ -71,30 +71,32 @@
             </section>
 
             <section id="bottom" class="box">
-                <h2>Total Percentage</h2>
+                <h2>Revenue Percentage</h2>
                 <div class="dashboardItem">
                     <h3>Cast Iron</h3>
-                    <p>0%</p>
+                    <p id="castIronPercentage">0%</p>
                 </div>
                 <div class="dashboardItem">
                     <h3>3PLY</h3>
-                    <p>0%</p>
+                    <p id="triplyPercentage">0%</p>
                 </div>
                 <div class="dashboardItem">
                     <h3>TNS</h3>
-                    <p>0%</p>
+                    <p id="tnsPercentage">0%</p>
                 </div>
                 <div class="dashboardItem">
                     <h3>Stoneware</h3>
-                    <p>0%</p>
+                    <p id="stonewarePercentage">0%</p>
                 </div>
                 <div class="dashboardItem">
                     <h3>Miscellaneous</h3>
-                    <p>0%</p>
+                    <p id="miscellaneousPercentage">0%</p>
                 </div>
+                <canvas id="chartContainer"></canvas>
             </section>
         </section>
     </main>
 </body>
 <script src="index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </html>
