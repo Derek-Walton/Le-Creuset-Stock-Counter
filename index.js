@@ -14,6 +14,7 @@ window.onload = function() {
   elements.allFilter.addEventListener('click', allFilter);
   elements.alphabeticalSort.addEventListener('click', alphabeticalSort);
   elements.quantitySort.addEventListener('click', quantitySort);
+  elements.costSort.addEventListener('click', costSort);
   elements.totalCostSort.addEventListener('click', totalCostSort);
 };
 
@@ -24,8 +25,8 @@ const elementIds = [
   // Filters
   'castIronFilter', 'triplyFilter', 'tnsFilter', 'stonewareFilter',
   'mugsFilter', 'miscellaneousFilter', 'unassignedFilter', 'allFilter',
-  'alphabeticalSort', 'quantitySort', 'totalCostSort',
-  // Sorts
+  'alphabeticalSort', 'quantitySort', 'costSort', 'totalCostSort',
+  // Stats
   'totalQuantityStat', 'totalCostStat', 'avgCostStat', 'castIronPercentage', 
   'triplyPercentage', 'tnsPercentage', 'stonewarePercentage', 'miscellaneousPercentage', 
   'unassignedPercentage', 
@@ -45,6 +46,7 @@ for (const id of elementIds) {
 let alphabeticalToggle = false;
 let quantityToggle = false;
 let totalCostToggle = false;
+let costToggle = false;
 
 // Main array which is displayed on screen
 let productArray = [];
@@ -91,17 +93,22 @@ function initObject() {
   
   for (let i = 2; i < spreadsheetSplit.length; i += 5) {
     const productName = spreadsheetSplit[i];    
-    const productPrice = -parseFloat(spreadsheetSplit[i + 3].split('\'')[0]);
+    const productPrice = -spreadsheetSplit[i + 3].split('\n')[0];
+    const productTotalPrice = -parseFloat(spreadsheetSplit[i + 3].split('\'')[0]);
     const productQuantity = -spreadsheetSplit[i + 2];
+    const productDate = spreadsheetSplit[i + 1];
     if (productName != 'Item Description') {
       if (productArray.find(product => product.itemDescription == productName)) {
-        productArray.find(product => product.itemDescription == productName).totalCost += productPrice;
-        productArray.find(product => product.itemDescription == productName).quantity += productQuantity;
+        const correctProduct = productArray.find(product => product.itemDescription == productName);
+        correctProduct.totalCost += productTotalPrice;
+        correctProduct.quantity += productQuantity;
+        correctProduct.productPrice = (correctProduct.productPrice + productPrice / 2);
       } else {
         productArray.push({ 
           itemDescription: productName, 
           quantity: productQuantity, 
-          totalCost: productPrice
+          unitCost: productPrice, 
+          totalCost: productTotalPrice
         })
       }
     }
@@ -274,8 +281,12 @@ function createTables() {
       const quantity = document.createTextNode(product.quantity);
       rowQuantity.appendChild(quantity);
       
+      const rowAvgCost = document.createElement('td');
+      const avgCost = document.createTextNode(`£${product.unitCost.toFixed(2)}`);
+      rowAvgCost.appendChild(avgCost);
+      
       const rowTotalCost = document.createElement('td');
-      const totalCost = document.createTextNode(product.totalCost.toFixed(2));
+      const totalCost = document.createTextNode(`£${product.totalCost.toFixed(2)}`);
       rowTotalCost.appendChild(totalCost);
       
       const checkBoxElement = document.createElement('td');
@@ -286,6 +297,7 @@ function createTables() {
       // Append instead of append child
       row.appendChild(rowName);
       row.appendChild(rowQuantity);
+      row.appendChild(rowAvgCost);
       row.appendChild(rowTotalCost);
       row.appendChild(checkBoxElement);
       
@@ -377,6 +389,17 @@ function quantitySort(){
   ? -1 : 0);  
   createTables();
   quantityToggle = !quantityToggle;
+}
+
+function costSort(){
+  clearTable();
+  costToggle ? productArray.sort((product1, product2) => (product1.unitCost < product2.unitCost) 
+  ? 1 : (product1.unitCost > product2.unitCost) 
+  ? -1 : 0) : productArray.sort((product1, product2) => (product1.unitCost > product2.unitCost) 
+  ? 1 : (product1.unitCost < product2.unitCost) 
+  ? -1 : 0);  
+  createTables();
+  costToggle = !costToggle;
 }
 
 function totalCostSort(){
