@@ -41,7 +41,6 @@ for (const id of elementIds) {
   elements[id] = document.querySelector(`#${id}`);
 }
 
-
 // Toggles for sorts
 let alphabeticalToggle = false;
 let quantityToggle = false;
@@ -60,11 +59,15 @@ let miscellaneousArray = [];
 let mugArray = [];
 let unassignedArray = [];
 
+let pieChart;
+
 // Functions
 
 // Ran on submit
 function init(){
+  clearData();
   initObject();
+  pieChart ? pieChart.destroy() : '';
   originalArray = productArray;
   
   productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
@@ -80,8 +83,27 @@ function init(){
   unassignedInit()
 
   updateMoneyPercentage();
+
   createTables();
 }
+
+function clearData(){
+  alphabeticalToggle = false;
+  quantityToggle = false;
+  totalCostToggle = false;
+  costToggle = false;
+  productArray = [];
+  originalArray = [];
+  castIronArray = [];
+  triplyArray = [];
+  tnsArray = [];
+  stonewareArray = [];
+  miscellaneousArray = [];
+  mugArray = [];
+  unassignedArray = [];
+  updateDashboard();
+}
+
 
 // Creates the main object for all the products
 function initObject() {
@@ -267,6 +289,8 @@ function unassignedInit(){
 
 // Creates the table for the screen
 function createTables() {
+  console.log('HERREREEE!!');
+  
   let staggeredRow = true;
   productArray.forEach(product => {
     if (product.quantity > 0) {
@@ -473,7 +497,7 @@ function updateMoneyPercentage(){
   elements.miscellaneousPercentage.textContent = miscellaneousPercentage.toFixed(1) + '%';
   elements.unassignedPercentage.textContent = unassignedPercentage.toFixed(1) + '%';
 
-  new Chart("chartContainer", {
+  pieChart = new Chart("chartContainer", {
     type: 'pie',
     data: {
       labels: ['Cast Iron', '3PLY', 'TNS', 'Stoneware', 'Miscellaneous', 'Unassigned'],
