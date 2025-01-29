@@ -31,7 +31,7 @@ const elementIds = [
   'triplyPercentage', 'tnsPercentage', 'stonewarePercentage', 'miscellaneousPercentage', 
   'unassignedPercentage', 
   // Charts
-  'chartContainer', 'errorPercentage'
+  'chartContainer', 'errorPercentage', 'filterTitle'
 ];
 
 const elements = {};
@@ -70,9 +70,8 @@ function init(){
   pieChart ? pieChart.destroy() : '';
   originalArray = productArray;
   
-  productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
-  ? 1 : (product1.itemDescription < product2.itemDescription) 
-  ? -1 : 0);
+  // Default 
+  alphabeticalSort();
 
   castIronInit();
   triplyInit();
@@ -349,57 +348,70 @@ function castIronFilter (){
   clearTable();
   productArray = castIronArray;
   createTables();
+  elements.filterTitle.textContent = 'Cast Iron';
 }
 // REPETITIVE
 function triplyFilter (){
   clearTable();
   productArray = triplyArray;
   createTables();
+  elements.filterTitle.textContent = '3PLY';
 }
 
 function tnsFilter (){
   clearTable();
   productArray = tnsArray;
   createTables();
+  elements.filterTitle.textContent = 'TNS';
 }
 
 function stonewareFilter (){
   clearTable();
   productArray = stonewareArray;
   createTables();
+  elements.filterTitle.textContent = 'Stoneware';
 }
 
 function mugsFilter (){
   clearTable();
   productArray = mugArray;
   createTables();
+  elements.filterTitle.textContent = 'Mugs';
 }
 
 function miscellaneousFilter (){
   clearTable();
   productArray = miscellaneousArray;
   createTables();
+  elements.filterTitle.textContent = 'Miscellaneous';
 }
 
 function unassignedFilter (){
   clearTable();
   productArray = unassignedArray;
   createTables();
+  elements.filterTitle.textContent = 'Unassigned';
 }
 
 function allFilter (){
   clearTable();
   productArray = originalArray;
   createTables();
+  elements.filterTitle.textContent = 'All';
 }
 
 function alphabeticalSort(){
   clearTable();
-  alphabeticalToggle ? productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
-    ? 1 : (product1.itemDescription < product2.itemDescription) 
-    ? -1 : 0) : productArray.sort((product1, product2) => (product1.itemDescription < product2.itemDescription) 
+  alphabeticalToggle ? productArray.sort((product1, product2) => (product1.itemDescription < product2.itemDescription) 
     ? 1 : (product1.itemDescription > product2.itemDescription) 
+    ? -1 : 0) : productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
+    ? 1 : (product1.itemDescription < product2.itemDescription) 
     ? -1 : 0);
+  // alphabeticalToggle ? productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
+  //   ? 1 : (product1.itemDescription < product2.itemDescription) 
+  //   ? -1 : 0) : productArray.sort((product1, product2) => (product1.itemDescription < product2.itemDescription) 
+  //   ? 1 : (product1.itemDescription > product2.itemDescription) 
+  //   ? -1 : 0);
   createTables();
   alphabeticalToggle = !alphabeticalToggle;
 }

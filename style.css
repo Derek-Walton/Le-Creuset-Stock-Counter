@@ -88,7 +88,6 @@ main {
 }
 
 #chartContainer {
-  /* width: 100%; */
   max-width: 100%;
   max-height: 20vh;
 }
@@ -106,7 +105,7 @@ main {
 }
 
 .dashboardItem {
-  padding-bottom: 1rem;
+  padding-bottom: .8rem;
 }
 
 .dashboardItem > h3 {
@@ -124,8 +123,9 @@ main {
   padding: 1rem;
 }
 
-#bottom > h2 {
+#bottom > h2, #top > h2 {
   font-weight: 500;
+  padding-bottom: .5rem;
 }
 
 .box {
@@ -205,9 +205,15 @@ table {
   width: 100%;
 }
 
-/* @media (max-width: 750px;) {
-  
-} */
+@media (max-width: 900px) {
+  main {
+    flex-direction: column-reverse;
+  }
+
+  #left {
+    width: auto;
+  }
+}
 
 
 /* 
