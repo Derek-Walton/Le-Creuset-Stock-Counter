@@ -1,74 +1,45 @@
 // Init
 window.onload = function() {
   // Event listeners
-  submitButton.addEventListener('click', initTable);
+  elements.submitButton.addEventListener('click', init);
 
   // Filter + sort
-  castIron.addEventListener('click', castIronFilter);
-  triply.addEventListener('click', triplyFilter);
-  tns.addEventListener('click', tnsFilter);
-  stoneware.addEventListener('click', stonewareFilter);
-  mugs.addEventListener('click', mugsFilter);
-  miscellaneous.addEventListener('click', miscellaneousFilter);
-  seasonal.addEventListener('click', seasonalFilter);
-  all.addEventListener('click', allFilter);
-  alphabeticalButton.addEventListener('click', alphabeticalSort);
-  quantityButton.addEventListener('click', quantitySort);
-  totalCostButton.addEventListener('click', totalCostSort);
+  elements.castIronFilter.addEventListener('click', castIronFilter);
+  elements.triplyFilter.addEventListener('click', triplyFilter);
+  elements.tnsFilter.addEventListener('click', tnsFilter);
+  elements.stonewareFilter.addEventListener('click', stonewareFilter);
+  elements.mugsFilter.addEventListener('click', mugsFilter);
+  elements.miscellaneousFilter.addEventListener('click', miscellaneousFilter);
+  elements.unassignedFilter.addEventListener('click', unassignedFilter);
+  elements.allFilter.addEventListener('click', allFilter);
+  elements.alphabeticalSort.addEventListener('click', alphabeticalSort);
+  elements.quantitySort.addEventListener('click', quantitySort);
+  elements.totalCostSort.addEventListener('click', totalCostSort);
 };
 
-// loop over ID's 
 
-// const elementIds = [
-//   'submit', 'spreadsheetData', 'output', 'outputArea','castIron',
-//   'triply', 'tns', 'stoneware', 'mugs', 'miscellaneous', 'seasonal', 
-//   'all','alphabeticalButton', 'quantityButton', 'totalCostButton', 
-//   'totalQuantity', 'totalCost', 'avgCost', 'mostPopular', 'leastPopular',
-//   'castIronPercentage', 'triplyPercentage', 'tnsPercentage', 'stonewarePercentage',
-//   'miscellaneousPercentage'
-// ];
+const elementIds = [
+  // Main Components
+  'submitButton', 'spreadsheetInput', 'tableBody', 'table', 
+  // Filters
+  'castIronFilter', 'triplyFilter', 'tnsFilter', 'stonewareFilter',
+  'mugsFilter', 'miscellaneousFilter', 'unassignedFilter', 'allFilter',
+  'alphabeticalSort', 'quantitySort', 'totalCostSort',
+  // Sorts
+  'totalQuantityStat', 'totalCostStat', 'avgCostStat', 'castIronPercentage', 
+  'triplyPercentage', 'tnsPercentage', 'stonewarePercentage', 'miscellaneousPercentage', 
+  'unassignedPercentage', 
+  // Charts
+  'chartContainer', 'errorPercentage'
+];
 
-// const elements = {};
+const elements = {};
 
-// for (const id of elementIds) {
-//   elements[id] = document.querySelector(`#${id}`);
-// }
+// loop over ID's and assign each id their element
+for (const id of elementIds) {
+  elements[id] = document.querySelector(`#${id}`);
+}
 
-// Main Components
-const submitButton = document.querySelector('#submit');
-const inputElem = document.querySelector('#spreadsheetData');
-const tableElem = document.querySelector('#output');
-const outputArea = document.querySelector('#outputArea');
-
-// Filters
-const castIron = document.querySelector('#castIron');
-const triply = document.querySelector('#triply');
-const tns = document.querySelector('#tns');
-const stoneware = document.querySelector('#stoneware');
-const mugs = document.querySelector('#mugs');
-const miscellaneous = document.querySelector('#miscellaneous');
-const seasonal = document.querySelector('#seasonal');
-const all = document.querySelector('#all');
-
-// Sorts
-const alphabeticalButton = document.querySelector('#alphabeticalButton');
-const quantityButton = document.querySelector('#quantityButton');
-const totalCostButton = document.querySelector('#totalCostButton');
-
-// Stats
-const totalQuantityStat = document.querySelector('#totalQuantity');
-const totalCostStat = document.querySelector('#totalCost');
-const avgCostStat = document.querySelector('#avgCost');
-const mostPopularStat = document.querySelector('#mostPopular');
-const leastPopularStat = document.querySelector('#leastPopular');
-
-const castIronPercentageElem = document.querySelector('#castIronPercentage');
-const triplyPercentageElem = document.querySelector('#triplyPercentage');
-const tnsPercentageElem = document.querySelector('#tnsPercentage');
-const stonewarePercentageElem = document.querySelector('#stonewarePercentage');
-const miscellaneousPercentageElem = document.querySelector('#miscellaneousPercentage');
-
-const chartContainer = document.querySelector('#chartContainer');
 
 // Toggles for sorts
 let alphabeticalToggle = false;
@@ -85,13 +56,12 @@ let tnsArray = [];
 let stonewareArray = [];
 let miscellaneousArray = [];
 let mugArray = [];
-
-
+let unassignedArray = [];
 
 // Functions
 
 // Ran on submit
-function initTable(){
+function init(){
   initObject();
   originalArray = productArray;
   
@@ -105,6 +75,7 @@ function initTable(){
   mugsInit();
   miscellaneousInit();
   stonewareInit();
+  unassignedInit()
 
   updateMoneyPercentage();
   createTables();
@@ -113,9 +84,9 @@ function initTable(){
 // Creates the main object for all the products
 function initObject() {
   clearTable();
-  outputArea.style.display = 'table';
-  const spreadsheetData = inputElem.value;
-  inputElem.value = '';
+  elements.table.style.display = 'table';
+  const spreadsheetData = elements.spreadsheetInput.value;
+  elements.spreadsheetInput.value = '';
   const spreadsheetSplit = spreadsheetData.split('\t');
   
   for (let i = 2; i < spreadsheetSplit.length; i += 5) {
@@ -188,15 +159,52 @@ function tnsInit(){
 }
 
 function stonewareInit(){
-  let newStonewareArray = originalArray.filter(
-    item => !castIronArray.includes(item) &&
-    !tnsArray.includes(item) &&
-    !triplyArray.includes(item) &&
-    !miscellaneousArray.includes(item)
-);  
+  const stonewareKeywordsStartWith = ['10', '25cm', 'ct ', 'cookie jar', 'gravy', 'heart tart', 
+    'honey', 'lc b', 'lc mug', 'lc cappuccino', 'lc espresso', 'lc grand mug', 'lc outlet', 
+    'lc petite', 'lc r', 'lc s', 'med stor', 'oil', '300ml pumpkin', '20cm flower dish'
+  ];
+  const stonewareKeywordsIncludes = [
+    'apple', 'cereal', 'dinner', 'plate', 'soup bowl x 2', 
+    'pet bowl', 'lc van', 'dip bowl', 'pasta bowl', 'rice bowl', 'fusion', 'coffee', 'egg cup', 
+    'garlic keeper', 'tea pot', 'spoon rest', 'mixing jug', 'lasagna', 'heart dish', 'mug', 
+    'rainbow', 'pie', 'heart plate', 'ramekin', 'mini sauce', 'soup bowl 14', 'stoneware', 'tapas',
+    'teapot', 'camembert', 'fluted fan', 'frill bowl'
+  ];
+  let newStonewareArray = [];
+  originalArray.forEach(product => {
+    let lowerCaseProduct = product.itemDescription.toLowerCase();
+    if (
+      stonewareKeywordsIncludes.some(keyword => lowerCaseProduct.includes(keyword)) ||
+      stonewareKeywordsStartWith.some(keyword => lowerCaseProduct.startsWith(keyword))
+      ) {
+        newStonewareArray.push(product);
+    }
+  });
   stonewareArray = newStonewareArray;
+
   return stonewareArray
 }
+
+
+// ORIGNIAL
+// function stonewareInitORIGINAL(){
+//   let newStonewareArray = originalArray.filter(
+//     item => !castIronArray.includes(item) &&
+//     !tnsArray.includes(item) &&
+//     !triplyArray.includes(item) &&
+//     !miscellaneousArray.includes(item)
+// );  
+//   stonewareArray = newStonewareArray;
+
+//   // const newArr = [];
+//   // for (const item of stonewareArray) {
+//   //   // newArr.push(item.values);
+//   //   newArr.push(Object.values(item).join('\t'));
+//   // }
+//   // console.log(newArr.join('\n'));
+
+//   return stonewareArray
+// }
 
 function mugsInit(){
   const mugKeywords = ['lc mug', 'lc cappuccino', 'lc espresso', 'lc grand mug'];
@@ -212,19 +220,20 @@ function mugsInit(){
 }
 
 function miscellaneousInit(){
-  const miscellaneousKeywordsStartWith = ['class', '30cm', 'ss mixing', 'bak', 'silicone mill'];
+  const miscellaneousKeywordsStartWith = ['class', '30cm', 'ss mixing', 'bak', 'silicone mill', 'sw1'];
   const miscellaneousKeywordsIncludes = ['kettle', 'splatter', 'glass', 'glass', ' ss', 'bottle', 
     'garlic press', 'spoons', 'strainer', 'protector', 'turner', 'mash', 'wire', 'ovw', 'cooler', 
     'wine', 'opener', 'waiters', 'cutter', 'stopper', 'drip', 'spat', 'brush', 'cleaner', 'book', 
     'handle', 'knob', 'cool tool', 'glove', 'mitt', 'citrus', 'peeler', 'turner', 'whisk', 'tongs', 
-    'knife', 'grater', 'gift voucher', 'gift box', 'activ table', 'pourer', 'virtual sales', 
-    'cookie jar santa'
+    'knife', 'grater', 'gift voucher', 'gift box', 'activ', 'pourer', 'virtual sales', 
+    'cookie jar santa', 'mini ornaments', 'ladle', 'pasta fork', 'edge spoon', 'edge serving spoon',
+    'acacia wood', 'ceramic bkg beans', 'chefs apron', 'slotted spoon', 
   ];
   let newMiscellaneousArray = [];
   originalArray.forEach(product => {
     let lowerCaseProduct = product.itemDescription.toLowerCase();
     if (
-      miscellaneousKeywordsIncludes.some(keyword => lowerCaseProduct.startsWith(keyword)) ||
+      miscellaneousKeywordsIncludes.some(keyword => lowerCaseProduct.includes(keyword)) ||
       miscellaneousKeywordsStartWith.some(keyword => lowerCaseProduct.startsWith(keyword))
       ) {
         newMiscellaneousArray.push(product);
@@ -232,6 +241,18 @@ function miscellaneousInit(){
   });
   miscellaneousArray = newMiscellaneousArray;
   return miscellaneousArray
+}
+
+function unassignedInit(){
+  let newUnassignedArray = originalArray.filter(
+    item => !castIronArray.includes(item) &&
+    !tnsArray.includes(item) &&
+    !triplyArray.includes(item) &&
+    !stonewareArray.includes(item) &&
+    !miscellaneousArray.includes(item)
+);  
+  unassignedArray = newUnassignedArray;
+  return unassignedArray
 }
 
 
@@ -268,7 +289,7 @@ function createTables() {
       row.appendChild(rowTotalCost);
       row.appendChild(checkBoxElement);
       
-      tableElem.appendChild(row);
+      elements.tableBody.appendChild(row);
       staggeredRow = !staggeredRow;
       updateDashboard()
     }
@@ -277,9 +298,9 @@ function createTables() {
 
 // Clears the table on the screen
 function clearTable() {
-  while (tableElem.firstChild) {
+  while (elements.tableBody.firstChild) {
     // remove instead of
-    tableElem.removeChild(tableElem.lastChild);
+    elements.tableBody.removeChild(elements.tableBody.lastChild);
   }
 }
 
@@ -324,8 +345,10 @@ function miscellaneousFilter (){
   createTables();
 }
 
-function seasonalFilter (){
-
+function unassignedFilter (){
+  clearTable();
+  productArray = unassignedArray;
+  createTables();
 }
 
 function allFilter (){
@@ -388,6 +411,7 @@ function updateMoneyPercentage(){
   let totalTns = 0;
   let totalStoneware = 0;
   let totalMiscellaneous = 0;
+  let totalUnassigned = 0;
 
   for (const product of originalArray) {
     totalMoney += product.totalCost;
@@ -407,28 +431,33 @@ function updateMoneyPercentage(){
   for (const product of miscellaneousArray) {
     totalMiscellaneous += product.totalCost;
   }
+  for (const product of unassignedArray) {
+    totalUnassigned += product.totalCost;
+  }
   
   // Arrow function 
-  let castIronPercentage = (totalCastIron * 100 / totalMoney).toFixed(1);
-  let triplyPercentage = (totalTriply * 100 / totalMoney).toFixed(1);
-  let tnsPercentage = (totalTns * 100 / totalMoney).toFixed(1);
-  let stonewarePercentage = (totalStoneware * 100 / totalMoney).toFixed(1);
-  let miscellaneousPercentage = (totalMiscellaneous * 100 / totalMoney).toFixed(1);
+  let castIronPercentage = (totalCastIron * 100 / totalMoney);
+  let triplyPercentage = (totalTriply * 100 / totalMoney);
+  let tnsPercentage = (totalTns * 100 / totalMoney);
+  let stonewarePercentage = (totalStoneware * 100 / totalMoney);
+  let miscellaneousPercentage = (totalMiscellaneous * 100 / totalMoney);
+  let unassignedPercentage = (totalUnassigned * 100 / totalMoney);
 
-  castIronPercentageElem.textContent = castIronPercentage + '%';
-  triplyPercentageElem.textContent = triplyPercentage + '%';
-  tnsPercentageElem.textContent = tnsPercentage + '%';
-  stonewarePercentageElem.textContent = stonewarePercentage + '%';
-  miscellaneousPercentageElem.textContent = miscellaneousPercentage + '%';
+  elements.castIronPercentage.textContent = castIronPercentage.toFixed(1) + '%';
+  elements.triplyPercentage.textContent = triplyPercentage.toFixed(1) + '%';
+  elements.tnsPercentage.textContent = tnsPercentage.toFixed(1) + '%';
+  elements.stonewarePercentage.textContent = stonewarePercentage.toFixed(1) + '%';
+  elements.miscellaneousPercentage.textContent = miscellaneousPercentage.toFixed(1) + '%';
+  elements.unassignedPercentage.textContent = unassignedPercentage.toFixed(1) + '%';
 
   new Chart("chartContainer", {
     type: 'pie',
     data: {
-      labels: ['Cast Iron', '3PLY', 'TNS', 'Stoneware', 'Miscellaneous'],
+      labels: ['Cast Iron', '3PLY', 'TNS', 'Stoneware', 'Miscellaneous', 'Unassigned'],
       datasets: [{
-        data: [castIronPercentage, triplyPercentage, tnsPercentage, stonewarePercentage, miscellaneousPercentage],
+        data: [castIronPercentage, triplyPercentage, tnsPercentage, stonewarePercentage, miscellaneousPercentage, unassignedPercentage],
         borderWidth: 1,
-        backgroundColor: ['#ff6702', 'lightgray', '#3a3a3a', 'red', 'lightblue']
+        backgroundColor: ['#ff6702', 'lightgray', '#3a3a3a', 'red', 'lightblue', 'lightgreen']
       }]
     },
     options: {
@@ -439,6 +468,11 @@ function updateMoneyPercentage(){
       }
     }
   });
+
+
+  const total = castIronPercentage + triplyPercentage + tnsPercentage + stonewarePercentage + miscellaneousPercentage + unassignedPercentage
+  elements.errorPercentage.style.display = 'block';
+  elements.errorPercentage.textContent = `Margin of Error: ${(((total - 100) / total) * 100).toFixed(2)}%`
 }
 
 function loadPieChart(){

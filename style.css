@@ -90,7 +90,12 @@ main {
 #chartContainer {
   /* width: 100%; */
   max-width: 100%;
-  max-height: 30vh;
+  max-height: 20vh;
+}
+
+#errorPercentage {
+  display: none;
+  padding-top: 1rem;
 }
 
 #top {
@@ -178,7 +183,7 @@ textarea {
 }
 
 
-#outputArea {
+table {
   display: none;
 }
 

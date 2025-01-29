@@ -9,61 +9,59 @@
 <body>
     <header>
         <h2>Filters</h2>
-        <button class="filter" id="castIron">Cast Iron</button>
-        <button class="filter" id="triply">3PLY</button>
-        <button class="filter" id="tns">TNS</button>
-        <button class="filter" id="stoneware">Stoneware</button>
-        <button class="filter" id="mugs">Mugs</button>
-        <button class="filter" id="miscellaneous">Miscellaneous</button>
-        <button class="filter" id="seasonal">Seasonal</button>
-        <button class="filter" id="all">All</button>
+        <button class="filter" id="castIronFilter">Cast Iron</button>
+        <button class="filter" id="triplyFilter">3PLY</button>
+        <button class="filter" id="tnsFilter">TNS</button>
+        <button class="filter" id="stonewareFilter">Stoneware</button>
+        <button class="filter" id="mugsFilter">Mugs</button>
+        <button class="filter" id="miscellaneousFilter">Miscellaneous</button>
+        <button class="filter" id="unassignedFilter">Unassigned</button>
+        <button class="filter" id="allFilter">All</button>
     </header>
     <main>
         <section id="left" class="box">
             <section id="inputArea">
-                <textarea id="spreadsheetData" placeholder="Paste Item Data Here"></textarea>
+                <textarea id="spreadsheetInput" placeholder="Paste Item Data Here"></textarea>
                 <div id="button-container">
-                    <button id="submit">Submit</button>
-                    <button id="alphabeticalButton">Alphabetical</button>
-                    <button id="quantityButton">Quantity</button>
-                    <button id="totalCostButton">Total Cost</button>
+                    <button id="submitButton">Submit</button>
+                    <button id="alphabeticalSort">Alphabetical</button>
+                    <button id="quantitySort">Quantity</button>
+                    <button id="totalCostSort">Total Cost</button>
                 </div>
             </section>
-            <section id="outputArea">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item Description</th>
-                            <th>Quantity</th>
-                            <th>Total Cost</th>
-                            <th>Ordered</th>
-                        </tr>
-                    </thead>
-                    <tbody id="output">
-                        <!-- Output will go here -->
-                    </tbody>
-                </table>
-            </section>
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th>Quantity</th>
+                        <th>Total Cost</th>
+                        <th>Ordered</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Output will go here -->
+                </tbody>
+            </table>
         </section>
 
         <section id="right">
             <section id="top" class="box">
                 <div class="dashboardItem">
                     <h3>Total Quantity</h3>
-                    <p id="totalQuantity">0 Units</p>
+                    <p id="totalQuantityStat">0 Units</p>
                 </div>
                 <div class="dashboardItem">
                     <h3>Total Cost</h3>
-                    <p id="totalCost">£0</p>
+                    <p id="totalCostStat">£0</p>
                 </div>
                 <div class="dashboardItem">
                     <h3>Average Cost</h3>
-                    <p id="avgCost">£0</p>
+                    <p id="avgCostStat">£0</p>
                 </div>
             </section>
 
             <section id="bottom" class="box">
-                <h2>Revenue Percentage</h2>
+                <h2>Revenue Split</h2>
                 <div class="dashboardItem">
                     <h3>Cast Iron</h3>
                     <p id="castIronPercentage">0%</p>
@@ -84,7 +82,12 @@
                     <h3>Miscellaneous</h3>
                     <p id="miscellaneousPercentage">0%</p>
                 </div>
+                <div class="dashboardItem">
+                    <h3>Unassigned</h3>
+                    <p id="unassignedPercentage">0%</p>
+                </div>
                 <canvas id="chartContainer"></canvas>
+                <p id="errorPercentage">Margin of Error: 0%</p>
             </section>
         </section>
     </main>
