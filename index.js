@@ -48,9 +48,11 @@ let totalCostToggle = false;
 let costToggle = false;
 
 // Main array which is displayed on screen
-let productArray = [];
+let itemArray = [];
 
 // Hidden arrays which are categorized
+let itemDateArray = [];
+let dayArray = [];
 let castIronArray = [];
 let triplyArray = [];
 let tnsArray = [];
@@ -66,12 +68,13 @@ let pieChart;
 // Ran on submit
 function init(){
   clearData();
+  initItemObject();
   initObject();
   pieChart ? pieChart.destroy() : '';
-  originalArray = productArray;
+  originalArray = itemArray;
   
   // Default 
-  alphabeticalSort();
+  alphabeticalSort(true);
 
   castIronInit();
   triplyInit();
@@ -91,7 +94,8 @@ function clearData(){
   quantityToggle = false;
   totalCostToggle = false;
   costToggle = false;
-  productArray = [];
+  itemDateArray = [];
+  itemArray = [];
   originalArray = [];
   castIronArray = [];
   triplyArray = [];
@@ -100,11 +104,10 @@ function clearData(){
   miscellaneousArray = [];
   mugArray = [];
   unassignedArray = [];
-  updateDashboard();
 }
 
 
-// Creates the main object for all the products
+// Creates the main object for all the items
 function initObject() {
   clearTable();
   elements.table.style.display = 'table';
@@ -113,29 +116,72 @@ function initObject() {
   const spreadsheetSplit = spreadsheetData.split('\t');
   
   for (let i = 2; i < spreadsheetSplit.length; i += 5) {
-    const productName = spreadsheetSplit[i];    
-    const productPrice = -spreadsheetSplit[i + 3].split('\n')[0];
-    const productTotalPrice = -parseFloat(spreadsheetSplit[i + 3].split('\'')[0]);
-    const productQuantity = -spreadsheetSplit[i + 2];
-    const productDate = spreadsheetSplit[i + 1];
-    if (productName != 'Item Description') {
-      if (productArray.find(product => product.itemDescription == productName)) {
-        const correctProduct = productArray.find(product => product.itemDescription == productName);
-        correctProduct.totalCost += productTotalPrice;
-        correctProduct.quantity += productQuantity;
-        correctProduct.productPrice = (correctProduct.productPrice + productPrice / 2);
+    const itemName = spreadsheetSplit[i];    
+    const itemPrice = -spreadsheetSplit[i + 3].split('\n')[0];
+    const itemTotalPrice = -parseFloat(spreadsheetSplit[i + 3].split('\'')[0]);
+    const itemQuantity = -spreadsheetSplit[i + 2];
+    const itemDate = spreadsheetSplit[i + 1];
+    if (itemName != 'Item Description') {
+      if (itemArray.find(item => item.itemDescription == itemName)) {
+        const correctItem = itemArray.find(item => item.itemDescription == itemName);
+        correctItem.totalCost += itemTotalPrice;
+        correctItem.quantity += itemQuantity;
+        correctItem.unitCost = (correctItem.unitCost + itemPrice / 2);
       } else {
-        productArray.push({ 
-          itemDescription: productName, 
-          quantity: productQuantity, 
-          unitCost: productPrice, 
-          totalCost: productTotalPrice
+        itemArray.push({ 
+          itemDescription: itemName, 
+          quantity: itemQuantity, 
+          unitCost: itemPrice, 
+          totalCost: itemTotalPrice
         })
       }
     }
   }
-  return productArray;
+  return itemArray;
 }
+
+
+// Used for dates
+function initItemObject() {
+  const spreadsheetData = elements.spreadsheetInput.value;
+  const spreadsheetSplit = spreadsheetData.split('\t');
+  
+  for (let i = 2; i < spreadsheetSplit.length; i += 5) {
+    const itemName = spreadsheetSplit[i];    
+    if (itemName != 'Item Description') {
+      const itemPrice = -spreadsheetSplit[i + 3].split('\n')[0];
+      const itemQuantity = -spreadsheetSplit[i + 2];
+      // const itemDate = spreadsheetSplit[i + 1];
+      // const itemDate = new Date(spreadsheetSplit[i + 1].split('/').join('-'));
+      const splitDate = spreadsheetSplit[i + 1].split('/');
+      let year;
+      let month;
+      let day;
+      if (splitDate[2].split('').length > 2) {
+        year = splitDate[2];
+        month = splitDate[0];
+        day = splitDate[1];
+      } else {
+        year = `20${splitDate[2]}`;
+        month = splitDate[1];
+        day = splitDate[0];
+      }
+      const dateJoined = [year, month, day].join('-');
+      const itemDate = new Date(dateJoined);
+      
+      itemDateArray.push({ 
+      itemDescription: itemName,
+      date: itemDate,
+      quantity: itemQuantity, 
+      unitCost: itemPrice, 
+      })  
+    }
+  }
+  
+  return itemDateArray;
+}
+
+
 
 // Initialization of the categories
 function castIronInit() {
@@ -147,14 +193,14 @@ function castIronInit() {
   ];
   let newCastIronArray = [];
   // FOR OF instead of forEach
-  originalArray.forEach(product => {
-    let lowerCaseProduct = product.itemDescription.toLowerCase();
+  originalArray.forEach(item => {
+    let lowerCaseItem = item.itemDescription.toLowerCase();
     if (
-      castIronKeywords.some(keyword => lowerCaseProduct.startsWith(keyword)) ||
-      lowerCaseProduct.includes('skillet') ||
-      lowerCaseProduct.includes('balti')
+      castIronKeywords.some(keyword => lowerCaseItem.startsWith(keyword)) ||
+      lowerCaseItem.includes('skillet') ||
+      lowerCaseItem.includes('balti')
     ) {
-      newCastIronArray.push(product);
+      newCastIronArray.push(item);
     }
   });
   castIronArray = newCastIronArray;
@@ -164,10 +210,10 @@ function castIronInit() {
 
 function triplyInit(){
   let newTriplyArray = [];
-  originalArray.forEach(product => {
-    let lowerCaseProduct = product.itemDescription.toLowerCase();
-    if (lowerCaseProduct.includes('3ply')) {
-      newTriplyArray.push(product);
+  originalArray.forEach(item => {
+    let lowerCaseItem = item.itemDescription.toLowerCase();
+    if (lowerCaseItem.includes('3ply')) {
+      newTriplyArray.push(item);
     }
   });
   triplyArray = newTriplyArray;
@@ -176,10 +222,10 @@ function triplyInit(){
 
 function tnsInit(){
   let newTnsArray = [];
-  originalArray.forEach(product => {
-    let lowerCaseProduct = product.itemDescription.toLowerCase();
-    if (lowerCaseProduct.includes('tns')) {
-      newTnsArray.push(product);
+  originalArray.forEach(item => {
+    let lowerCaseItem = item.itemDescription.toLowerCase();
+    if (lowerCaseItem.includes('tns')) {
+      newTnsArray.push(item);
     }
   });
   tnsArray = newTnsArray
@@ -199,48 +245,27 @@ function stonewareInit(){
     'teapot', 'camembert', 'fluted fan', 'frill bowl'
   ];
   let newStonewareArray = [];
-  originalArray.forEach(product => {
-    let lowerCaseProduct = product.itemDescription.toLowerCase();
+  originalArray.forEach(item => {
+    let lowerCaseItem = item.itemDescription.toLowerCase();
     if (
-      stonewareKeywordsIncludes.some(keyword => lowerCaseProduct.includes(keyword)) ||
-      stonewareKeywordsStartWith.some(keyword => lowerCaseProduct.startsWith(keyword))
+      stonewareKeywordsIncludes.some(keyword => lowerCaseItem.includes(keyword)) ||
+      stonewareKeywordsStartWith.some(keyword => lowerCaseItem.startsWith(keyword))
       ) {
-        newStonewareArray.push(product);
+        newStonewareArray.push(item);
     }
   });
   stonewareArray = newStonewareArray;
 
   return stonewareArray
-}
-
-
-// ORIGNIAL
-// function stonewareInitORIGINAL(){
-//   let newStonewareArray = originalArray.filter(
-//     item => !castIronArray.includes(item) &&
-//     !tnsArray.includes(item) &&
-//     !triplyArray.includes(item) &&
-//     !miscellaneousArray.includes(item)
-// );  
-//   stonewareArray = newStonewareArray;
-
-//   // const newArr = [];
-//   // for (const item of stonewareArray) {
-//   //   // newArr.push(item.values);
-//   //   newArr.push(Object.values(item).join('\t'));
-//   // }
-//   // console.log(newArr.join('\n'));
-
-//   return stonewareArray
-// }
+};
 
 function mugsInit(){
   const mugKeywords = ['lc mug', 'lc cappuccino', 'lc espresso', 'lc grand mug'];
   let newMugsArray = [];
-  originalArray.forEach(product => {
-    let lowerCaseProduct = product.itemDescription.toLowerCase();
-    if (mugKeywords.some(keyword => lowerCaseProduct.startsWith(keyword))) {
-      newMugsArray.push(product);
+  originalArray.forEach(item => {
+    let lowerCaseItem = item.itemDescription.toLowerCase();
+    if (mugKeywords.some(keyword => lowerCaseItem.startsWith(keyword))) {
+      newMugsArray.push(item);
     }
   });
   mugArray = newMugsArray;
@@ -258,13 +283,13 @@ function miscellaneousInit(){
     'acacia wood', 'ceramic bkg beans', 'chefs apron', 'slotted spoon', 
   ];
   let newMiscellaneousArray = [];
-  originalArray.forEach(product => {
-    let lowerCaseProduct = product.itemDescription.toLowerCase();
+  originalArray.forEach(item => {
+    let lowerCaseItem = item.itemDescription.toLowerCase();
     if (
-      miscellaneousKeywordsIncludes.some(keyword => lowerCaseProduct.includes(keyword)) ||
-      miscellaneousKeywordsStartWith.some(keyword => lowerCaseProduct.startsWith(keyword))
+      miscellaneousKeywordsIncludes.some(keyword => lowerCaseItem.includes(keyword)) ||
+      miscellaneousKeywordsStartWith.some(keyword => lowerCaseItem.startsWith(keyword))
       ) {
-        newMiscellaneousArray.push(product);
+        newMiscellaneousArray.push(item);
     }
   });
   miscellaneousArray = newMiscellaneousArray;
@@ -281,35 +306,34 @@ function unassignedInit(){
 );  
   unassignedArray = newUnassignedArray;
   return unassignedArray
-}
+};
 
 
 // Creating / removing the table
 
 // Creates the table for the screen
 function createTables() {
-  console.log('HERREREEE!!');
   
   let staggeredRow = true;
-  productArray.forEach(product => {
-    if (product.quantity > 0) {
+  itemArray.forEach(item => {
+    if (item.quantity > 0) {
       const row = document.createElement('tr');
       row.className =  staggeredRow ? 'even': 'odd';
       
       const rowName = document.createElement('td');
-      const name = document.createTextNode(product.itemDescription);
+      const name = document.createTextNode(item.itemDescription);
       rowName.appendChild(name);
       
       const rowQuantity = document.createElement('td');
-      const quantity = document.createTextNode(product.quantity);
+      const quantity = document.createTextNode(item.quantity);
       rowQuantity.appendChild(quantity);
       
       const rowAvgCost = document.createElement('td');
-      const avgCost = document.createTextNode(`£${product.unitCost.toFixed(2)}`);
+      const avgCost = document.createTextNode(`£${item.unitCost.toFixed(2)}`);
       rowAvgCost.appendChild(avgCost);
       
       const rowTotalCost = document.createElement('td');
-      const totalCost = document.createTextNode(`£${product.totalCost.toFixed(2)}`);
+      const totalCost = document.createTextNode(`£${item.totalCost.toFixed(2)}`);
       rowTotalCost.appendChild(totalCost);
       
       const checkBoxElement = document.createElement('td');
@@ -326,10 +350,10 @@ function createTables() {
       
       elements.tableBody.appendChild(row);
       staggeredRow = !staggeredRow;
-      updateDashboard()
     }
   });
-}
+  updateDashboard()
+};
 
 // Clears the table on the screen
 function clearTable() {
@@ -346,82 +370,77 @@ function clearTable() {
 // Event handlers for the filters + sorts
 function castIronFilter (){
   clearTable();
-  productArray = castIronArray;
+  itemArray = castIronArray;
   createTables();
   elements.filterTitle.textContent = 'Cast Iron';
 }
 // REPETITIVE
 function triplyFilter (){
   clearTable();
-  productArray = triplyArray;
+  itemArray = triplyArray;
   createTables();
   elements.filterTitle.textContent = '3PLY';
 }
 
 function tnsFilter (){
   clearTable();
-  productArray = tnsArray;
+  itemArray = tnsArray;
   createTables();
   elements.filterTitle.textContent = 'TNS';
 }
 
 function stonewareFilter (){
   clearTable();
-  productArray = stonewareArray;
+  itemArray = stonewareArray;
   createTables();
   elements.filterTitle.textContent = 'Stoneware';
 }
 
 function mugsFilter (){
   clearTable();
-  productArray = mugArray;
+  itemArray = mugArray;
   createTables();
   elements.filterTitle.textContent = 'Mugs';
 }
 
 function miscellaneousFilter (){
   clearTable();
-  productArray = miscellaneousArray;
+  itemArray = miscellaneousArray;
   createTables();
   elements.filterTitle.textContent = 'Miscellaneous';
 }
 
 function unassignedFilter (){
   clearTable();
-  productArray = unassignedArray;
+  itemArray = unassignedArray;
   createTables();
   elements.filterTitle.textContent = 'Unassigned';
 }
 
 function allFilter (){
   clearTable();
-  productArray = originalArray;
+  itemArray = originalArray;
   createTables();
   elements.filterTitle.textContent = 'All';
 }
 
-function alphabeticalSort(){
+function alphabeticalSort(init = false){
   clearTable();
-  alphabeticalToggle ? productArray.sort((product1, product2) => (product1.itemDescription < product2.itemDescription) 
-    ? 1 : (product1.itemDescription > product2.itemDescription) 
-    ? -1 : 0) : productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
-    ? 1 : (product1.itemDescription < product2.itemDescription) 
+  alphabeticalToggle ? itemArray.sort((item1, item2) => (item1.itemDescription < item2.itemDescription) 
+    ? 1 : (item1.itemDescription > item2.itemDescription) 
+    ? -1 : 0) : itemArray.sort((item1, item2) => (item1.itemDescription > item2.itemDescription) 
+    ? 1 : (item1.itemDescription < item2.itemDescription) 
     ? -1 : 0);
-  // alphabeticalToggle ? productArray.sort((product1, product2) => (product1.itemDescription > product2.itemDescription) 
-  //   ? 1 : (product1.itemDescription < product2.itemDescription) 
-  //   ? -1 : 0) : productArray.sort((product1, product2) => (product1.itemDescription < product2.itemDescription) 
-  //   ? 1 : (product1.itemDescription > product2.itemDescription) 
-  //   ? -1 : 0);
-  createTables();
+  !init ? createTables() : '';
   alphabeticalToggle = !alphabeticalToggle;
 }
 
 function quantitySort(){
   clearTable();
-  quantityToggle ? productArray.sort((product1, product2) => (product1.quantity < product2.quantity) 
-  ? 1 : (product1.quantity > product2.quantity) 
-  ? -1 : 0) : productArray.sort((product1, product2) => (product1.quantity > product2.quantity) 
-  ? 1 : (product1.quantity < product2.quantity) 
+  quantityToggle ? itemArray.sort((item1, item2) => (item1.quantity < item2.quantity) 
+  ? 1 : (item1.quantity > item2.quantity) 
+  ? -1 : 0) : itemArray.sort((item1, item2) => (item1.quantity > item2.quantity) 
+  ? 1 : (item1.quantity < item2.quantity) 
   ? -1 : 0);  
   createTables();
   quantityToggle = !quantityToggle;
@@ -429,10 +448,10 @@ function quantitySort(){
 
 function costSort(){
   clearTable();
-  costToggle ? productArray.sort((product1, product2) => (product1.unitCost < product2.unitCost) 
-  ? 1 : (product1.unitCost > product2.unitCost) 
-  ? -1 : 0) : productArray.sort((product1, product2) => (product1.unitCost > product2.unitCost) 
-  ? 1 : (product1.unitCost < product2.unitCost) 
+  costToggle ? itemArray.sort((item1, item2) => (item1.unitCost < item2.unitCost) 
+  ? 1 : (item1.unitCost > item2.unitCost) 
+  ? -1 : 0) : itemArray.sort((item1, item2) => (item1.unitCost > item2.unitCost) 
+  ? 1 : (item1.unitCost < item2.unitCost) 
   ? -1 : 0);  
   createTables();
   costToggle = !costToggle;
@@ -440,27 +459,87 @@ function costSort(){
 
 function totalCostSort(){
   clearTable();
-  totalCostToggle ? productArray.sort((product1, product2) => (product1.totalCost < product2.totalCost) 
-  ? 1 : (product1.totalCost > product2.totalCost) 
-  ? -1 : 0) : productArray.sort((product1, product2) => (product1.totalCost > product2.totalCost) 
-  ? 1 : (product1.totalCost < product2.totalCost) 
+  totalCostToggle ? itemArray.sort((item1, item2) => (item1.totalCost < item2.totalCost) 
+  ? 1 : (item1.totalCost > item2.totalCost) 
+  ? -1 : 0) : itemArray.sort((item1, item2) => (item1.totalCost > item2.totalCost) 
+  ? 1 : (item1.totalCost < item2.totalCost) 
   ? -1 : 0);  
   createTables();
   totalCostToggle = !totalCostToggle;
+}
+
+function dateSort(){
+  // clearTable();
+  itemDateArray.sort((item1, item2) => (item1.date < item2.date) 
+  ? 1 : (item1.date > item2.date) 
+  ? -1 : 0)  
 }
 
 // Func to update the dashboard whenever the filter changes
 function updateDashboard() {
   let totalQuantity = 0;
   let totalCost = 0;
-  productArray.forEach(product => {
-    totalQuantity += product.quantity
-    totalCost += product.totalCost
+  itemArray.forEach(item => {
+    totalQuantity += item.quantity
+    totalCost += item.totalCost
   });
   let avgCost = (totalCost / totalQuantity).toFixed(2);
-  totalQuantityStat.textContent = totalQuantity.toLocaleString('en') + ' Units';
-  totalCostStat.textContent = '£' + totalCost.toLocaleString('en');
-  avgCostStat.textContent = '£' + avgCost;
+  elements.totalQuantityStat.textContent = totalQuantity.toLocaleString('en') + ' Units';
+  elements.totalCostStat.textContent = '£' + totalCost.toLocaleString('en');
+  elements.avgCostStat.textContent = '£' + avgCost;
+
+  // ['Monday', 'T', 'W', 'T', 'F', 'S', 'S']
+
+
+ dateSort();
+
+//  itemDateArray
+ // miscellaneousKeywordsIncludes.some(keyword => lowerCaseItem.includes(keyword)) ||
+ // miscellaneousKeywordsStartWith.some(keyword => lowerCaseItem.startsWith(keyword))
+
+ let newItemDateObject = [];
+  for (const item of itemDateArray) {
+    if (newItemDateObject[item.date.getDay()]) {
+      newItemDateObject[item.date.getDay()] += item.unitCost;
+    } else {
+      newItemDateObject[item.date.getDay()] = item.unitCost;
+      
+    }
+  };
+  console.log(newItemDateObject);
+  // const dayNames = ['Sunday', 'Monday', ...]
+  // console.log(newItemDateObject['1']);
+  
+// IMPLEMENT LAST YEARS DATA TO COMPARE AGAINST THE DATA INPUTTED
+  const barChart = new Chart("barChart", {
+    type: 'bar',
+    data: {
+      labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      datasets: [{
+        label: 'Current Week Sales',
+        data: [newItemDateObject[1], newItemDateObject[2], newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0]
+        ],
+      },
+      {
+        label: 'Last Year Sales',
+        data: [newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0], newItemDateObject[1], newItemDateObject[2]
+        ],
+      }
+    ]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          stacked: false
+        },
+        x: {
+          stacked: true
+        }
+      }
+    }
+  });
+
 }
 
 function updateMoneyPercentage(){
@@ -472,26 +551,26 @@ function updateMoneyPercentage(){
   let totalMiscellaneous = 0;
   let totalUnassigned = 0;
 
-  for (const product of originalArray) {
-    totalMoney += product.totalCost;
+  for (const item of originalArray) {
+    totalMoney += item.totalCost;
   }
-  for (const product of castIronArray) {
-    totalCastIron += product.totalCost;
+  for (const item of castIronArray) {
+    totalCastIron += item.totalCost;
   }
-  for (const product of triplyArray) {
-    totalTriply += product.totalCost;
+  for (const item of triplyArray) {
+    totalTriply += item.totalCost;
   }
-  for (const product of tnsArray) {
-    totalTns += product.totalCost;
+  for (const item of tnsArray) {
+    totalTns += item.totalCost;
   }
-  for (const product of stonewareArray) {
-    totalStoneware += product.totalCost; 
+  for (const item of stonewareArray) {
+    totalStoneware += item.totalCost; 
   }
-  for (const product of miscellaneousArray) {
-    totalMiscellaneous += product.totalCost;
+  for (const item of miscellaneousArray) {
+    totalMiscellaneous += item.totalCost;
   }
-  for (const product of unassignedArray) {
-    totalUnassigned += product.totalCost;
+  for (const item of unassignedArray) {
+    totalUnassigned += item.totalCost;
   }
   
   // Arrow function 
