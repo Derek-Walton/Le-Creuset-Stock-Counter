@@ -52,6 +52,7 @@ let itemArray = [];
 
 // Hidden arrays which are categorized
 let itemDateArray = [];
+let lastYearsItemDateArray = [];
 let dayArray = [];
 let castIronArray = [];
 let triplyArray = [];
@@ -62,19 +63,35 @@ let mugArray = [];
 let unassignedArray = [];
 
 let pieChart;
+let barChart;
 
 // Functions
 
+async function readLastYearsSales() {
+  const res = await fetch('test-data/year-test-data.txt');
+  if (!res.ok) {
+    throw new Error('Failed to read last years sales');
+  }
+  const text = await res.text();
+  // resizeBy.text();
+  const lastYearSalesString = text;
+  lastYearsItemDateArray = spreadsheetDateParser(lastYearSalesString);
+}
+
+
+
 // Ran on submit
-function init(){
+async function init(){
+  // await readLastYearsSales();
   clearData();
   initItemObject();
   initObject();
   pieChart ? pieChart.destroy() : '';
+  // barChart ? barChart.destroy() : '';
   originalArray = itemArray;
   
   // Default 
-  alphabeticalSort(true);
+  alphabeticalSort(false);
 
   castIronInit();
   triplyInit();
@@ -144,10 +161,17 @@ function initObject() {
 // Used for dates
 function initItemObject() {
   const spreadsheetData = elements.spreadsheetInput.value;
+  itemDateArray = spreadsheetDateParser(spreadsheetData);
+}
+
+
+
+function spreadsheetDateParser(spreadsheetData) {
   const spreadsheetSplit = spreadsheetData.split('\t');
-  
+  const tempItemDateArray = [];
+
   for (let i = 2; i < spreadsheetSplit.length; i += 5) {
-    const itemName = spreadsheetSplit[i];    
+    const itemName = spreadsheetSplit[i];
     if (itemName != 'Item Description') {
       const itemPrice = -spreadsheetSplit[i + 3].split('\n')[0];
       const itemQuantity = -spreadsheetSplit[i + 2];
@@ -168,20 +192,18 @@ function initItemObject() {
       }
       const dateJoined = [year, month, day].join('-');
       const itemDate = new Date(dateJoined);
-      
-      itemDateArray.push({ 
-      itemDescription: itemName,
-      date: itemDate,
-      quantity: itemQuantity, 
-      unitCost: itemPrice, 
-      })  
+
+      tempItemDateArray.push({
+        itemDescription: itemName,
+        date: itemDate,
+        quantity: itemQuantity,
+        unitCost: itemPrice,
+      });
     }
   }
-  
-  return itemDateArray;
+
+  return tempItemDateArray;
 }
-
-
 
 // Initialization of the categories
 function castIronInit() {
@@ -424,14 +446,14 @@ function allFilter (){
   elements.filterTitle.textContent = 'All';
 }
 
-function alphabeticalSort(init = false){
+function alphabeticalSort(init = true){
   clearTable();
   alphabeticalToggle ? itemArray.sort((item1, item2) => (item1.itemDescription < item2.itemDescription) 
     ? 1 : (item1.itemDescription > item2.itemDescription) 
     ? -1 : 0) : itemArray.sort((item1, item2) => (item1.itemDescription > item2.itemDescription) 
     ? 1 : (item1.itemDescription < item2.itemDescription) 
     ? -1 : 0);
-  !init ? createTables() : '';
+  init ? createTables() : '';
   alphabeticalToggle = !alphabeticalToggle;
 }
 
@@ -468,10 +490,10 @@ function totalCostSort(){
   totalCostToggle = !totalCostToggle;
 }
 
-function dateSort(){
+function dateSort(unsortedItemDateArray){
   // clearTable();
-  itemDateArray.sort((item1, item2) => (item1.date < item2.date) 
-  ? 1 : (item1.date > item2.date) 
+  unsortedItemDateArray.sort((item1, item2) => (item1.date > item2.date) 
+  ? 1 : (item1.date < item2.date) 
   ? -1 : 0)  
 }
 
@@ -491,55 +513,95 @@ function updateDashboard() {
   // ['Monday', 'T', 'W', 'T', 'F', 'S', 'S']
 
 
- dateSort();
+ dateSort(itemDateArray);
+ dateSort(lastYearsItemDateArray);
 
 //  itemDateArray
  // miscellaneousKeywordsIncludes.some(keyword => lowerCaseItem.includes(keyword)) ||
  // miscellaneousKeywordsStartWith.some(keyword => lowerCaseItem.startsWith(keyword))
 
- let newItemDateObject = [];
-  for (const item of itemDateArray) {
-    if (newItemDateObject[item.date.getDay()]) {
-      newItemDateObject[item.date.getDay()] += item.unitCost;
-    } else {
-      newItemDateObject[item.date.getDay()] = item.unitCost;
+ let newItemDateObject = totalSalesPerDate(itemDateArray);
+ let lastYearItemDateObject = totalSalesPerDate(lastYearsItemDateArray);
+
+// Put last years data in a json file instead of reading it every time
+
+//  console.log(lastYearItemDateObject);
+// console.log(itemDateArray);
+
+ 
+
+  let daysData = [];
+  let dataSet = [];
+  let lastYearDataSet = [];
+
+  for (const dateObject of newItemDateObject) {
+    const formattedDate = (Object.keys(dateObject)).toString().split('').splice(-4).join('')
+    daysData.push((Object.keys(dateObject)).toString());
+    dataSet.push((Object.values(dateObject)).toString());
+    for (const lastYearDateObject of lastYearItemDateObject) {
+      const lastYearsFormattedDate = (Object.keys(lastYearDateObject)).toString().split('').splice(-4).join('')
+      // console.log(lastYearsFormattedDate, formattedDate);
       
+      if (lastYearsFormattedDate == formattedDate) {
+        lastYearDataSet.push((Object.values(lastYearDateObject)).toString());
+      }
+    }
+  }
+
+  // console.log(lastYearDataSet);
+  
+
+// IMPLEMENT LAST YEARS DATA TO COMPARE AGAINST THE DATA INPUTTED
+  // barChart = new Chart("barChart", {
+  //   type: 'bar',
+  //   data: {
+  //     // labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+  //     labels: daysData,
+  //     datasets: [{
+  //       label: 'Current Sales',
+  //       // data: [newItemDateObject[1], newItemDateObject[2], newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0]]
+  //       data: dataSet
+  //       ,
+  //     },
+  //     // {
+  //     //   label: 'Last Year Sales',
+  //     //   // data: [newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0], newItemDateObject[1], newItemDateObject[2]]
+  //     //   data: lastYearDataSet
+  //     //   ,
+  //     // }
+  //   ]
+  //   },
+  //   options: {
+  //     scales: {
+  //       y: {
+  //         beginAtZero: true,
+  //         stacked: false
+  //       },
+  //       x: {
+  //         stacked: true
+  //       }
+  //     }
+  //   }
+  // });
+
+}
+
+function totalSalesPerDate(newItemDateArray) {
+  
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  let newItemDateObject = [];
+  for (const item of newItemDateArray) {
+    const formattedDate = `${days[item.date.getDay()]} ${item.date.getDate()}/${item.date.getMonth() + 1}`;
+    if (newItemDateObject.find(dateObject => formattedDate == (Object.keys(dateObject)).toString())) {
+      const correctDate = newItemDateObject.find(dateObject => formattedDate == (Object.keys(dateObject)).toString());
+      correctDate[formattedDate] += item.unitCost;
+    } else {
+      newItemDateObject.push({ [formattedDate]: item.unitCost });
     }
   };
-  console.log(newItemDateObject);
-  // const dayNames = ['Sunday', 'Monday', ...]
-  // console.log(newItemDateObject['1']);
   
-// IMPLEMENT LAST YEARS DATA TO COMPARE AGAINST THE DATA INPUTTED
-  const barChart = new Chart("barChart", {
-    type: 'bar',
-    data: {
-      labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-      datasets: [{
-        label: 'Current Week Sales',
-        data: [newItemDateObject[1], newItemDateObject[2], newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0]
-        ],
-      },
-      {
-        label: 'Last Year Sales',
-        data: [newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0], newItemDateObject[1], newItemDateObject[2]
-        ],
-      }
-    ]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          stacked: false
-        },
-        x: {
-          stacked: true
-        }
-      }
-    }
-  });
-
+  return newItemDateObject;
 }
 
 function updateMoneyPercentage(){

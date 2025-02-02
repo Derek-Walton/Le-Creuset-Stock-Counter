@@ -48,50 +48,56 @@
 
         <section id="right">
             <section id="top" class="box">
-                <h2 id="filterTitle">All</h2>
-                <div class="dashboardItem">
-                    <h3>Total Quantity</h3>
-                    <p id="totalQuantityStat">0 Units</p>
-                </div>
-                <div class="dashboardItem">
-                    <h3>Total Cost</h3>
-                    <p id="totalCostStat">£0</p>
-                </div>
-                <div class="dashboardItem">
-                    <h3>Average Cost</h3>
-                    <p id="avgCostStat">£0</p>
+                <div id="filterStats">
+                    <h2 id="filterTitle">All</h2>
+                    <div class="dashboardItem">
+                        <h3>Total Quantity</h3>
+                        <p id="totalQuantityStat">0 Units</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>Total Cost</h3>
+                        <p id="totalCostStat">£0</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>Average Cost</h3>
+                        <p id="avgCostStat">£0</p>
+                    </div>
                 </div>
                 <canvas id="barChart"></canvas> <!-- Work in Progress Here -->
             </section>
 
             <section id="bottom" class="box">
-                <h2>Revenue Split</h2>
-                <div class="dashboardItem">
-                    <h3>Cast Iron</h3>
-                    <p id="castIronPercentage">0%</p>
+                <div id="bottomPercentage">
+                    <h2>Revenue Split</h2>
+                    <div class="dashboardItem">
+                        <h3>Cast Iron</h3>
+                        <p id="castIronPercentage">0%</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>3PLY</h3>
+                        <p id="triplyPercentage">0%</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>TNS</h3>
+                        <p id="tnsPercentage">0%</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>Stoneware</h3>
+                        <p id="stonewarePercentage">0%</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>Miscellaneous</h3>
+                        <p id="miscellaneousPercentage">0%</p>
+                    </div>
+                    <div class="dashboardItem">
+                        <h3>Unassigned</h3>
+                        <p id="unassignedPercentage">0%</p>
+                    </div>
                 </div>
-                <div class="dashboardItem">
-                    <h3>3PLY</h3>
-                    <p id="triplyPercentage">0%</p>
+                <div id="pieChartContainer">
+                    <canvas id="chartContainer"></canvas>
+                    <p id="errorPercentage">Margin of Error: 0%</p>
                 </div>
-                <div class="dashboardItem">
-                    <h3>TNS</h3>
-                    <p id="tnsPercentage">0%</p>
-                </div>
-                <div class="dashboardItem">
-                    <h3>Stoneware</h3>
-                    <p id="stonewarePercentage">0%</p>
-                </div>
-                <div class="dashboardItem">
-                    <h3>Miscellaneous</h3>
-                    <p id="miscellaneousPercentage">0%</p>
-                </div>
-                <div class="dashboardItem">
-                    <h3>Unassigned</h3>
-                    <p id="unassignedPercentage">0%</p>
-                </div>
-                <canvas id="chartContainer"></canvas>
-                <p id="errorPercentage">Margin of Error: 0%</p>
             </section>
         </section>
     </main>

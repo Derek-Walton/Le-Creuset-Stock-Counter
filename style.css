@@ -84,7 +84,7 @@ main {
   /* border: solid; */
   width: 100%;
   gap: 1rem;
-  max-height: calc(100dvh - 2rem);
+  /* max-height: calc(100dvh - 2rem); */
 }
 
 #chartContainer {
@@ -99,9 +99,19 @@ main {
 
 #top {
   border: solid;
-  flex-grow: 1;
-  max-height: 50vh;
+  /* flex-grow: 1; */
+  /* max-height: 50vh; */
   padding: 1rem;
+  display: flex;
+}
+
+#filterStats {
+  padding-right: 1rem;
+}
+
+#barChart {
+  max-width: 50dvw;
+  width: min-content;
 }
 
 .dashboardItem {
@@ -119,8 +129,9 @@ main {
 
 #bottom {
   border: solid;
-  flex-grow: 1;
+  /* flex-grow: 1; */
   padding: 1rem;
+  display: flex;
 }
 
 #bottom > h2, #top > h2 {
@@ -130,6 +141,13 @@ main {
 
 .box {
   background-color: rgb(255, 255, 255);
+}
+
+#pieChartContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 
 
@@ -212,6 +230,25 @@ table {
 
   #left {
     width: auto;
+  }
+}
+
+@media (min-width: 900px) {
+  #bottom {
+    display: flex;
+    height: min-content;
+  }
+
+  #left {
+    width: 70%;
+  }
+
+  #right {
+    width: 30%;
+  }
+
+  #top {
+    display: block;
   }
 }
 
