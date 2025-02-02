@@ -87,7 +87,7 @@ async function init(){
   initItemObject();
   initObject();
   pieChart ? pieChart.destroy() : '';
-  // barChart ? barChart.destroy() : '';
+  barChart ? barChart.destroy() : '';
   originalArray = itemArray;
   
   // Default 
@@ -673,6 +673,52 @@ function updateMoneyPercentage(){
   const total = castIronPercentage + triplyPercentage + tnsPercentage + stonewarePercentage + miscellaneousPercentage + unassignedPercentage
   elements.errorPercentage.style.display = 'block';
   elements.errorPercentage.textContent = `Margin of Error: ${(((total - 100) / total) * 100).toFixed(2)}%`
+
+
+  dateSort(itemDateArray);
+
+  let newItemDateObject = totalSalesPerDate(itemDateArray);
+ 
+
+  let daysData = [];
+  let dataSet = [];
+
+  for (const dateObject of newItemDateObject) {
+    daysData.push((Object.keys(dateObject)).toString());
+    dataSet.push((Object.values(dateObject)).toString());
+  }
+
+  barChart = new Chart("barChart", {
+    type: 'bar',
+    data: {
+      // labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      labels: daysData,
+      datasets: [{
+        label: 'Current Sales',
+        // data: [newItemDateObject[1], newItemDateObject[2], newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0]]
+        data: dataSet
+        ,
+      },
+      // {
+      //   label: 'Last Year Sales',
+      //   // data: [newItemDateObject[3], newItemDateObject[4], newItemDateObject[5], newItemDateObject[6], newItemDateObject[0], newItemDateObject[1], newItemDateObject[2]]
+      //   data: lastYearDataSet
+      //   ,
+      // }
+    ]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          stacked: false
+        },
+        x: {
+          stacked: true
+        }
+      }
+    }
+  });
 }
 
 function loadPieChart(){
