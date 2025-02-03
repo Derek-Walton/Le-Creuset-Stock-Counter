@@ -4,14 +4,17 @@ window.onload = function() {
   elements.submitButton.addEventListener('click', init);
 
   // Filter + sort
-  elements.castIronFilter.addEventListener('click', castIronFilter);
-  elements.triplyFilter.addEventListener('click', triplyFilter);
-  elements.tnsFilter.addEventListener('click', tnsFilter);
-  elements.stonewareFilter.addEventListener('click', stonewareFilter);
-  elements.mugsFilter.addEventListener('click', mugsFilter);
-  elements.miscellaneousFilter.addEventListener('click', miscellaneousFilter);
-  elements.unassignedFilter.addEventListener('click', unassignedFilter);
-  elements.allFilter.addEventListener('click', allFilter);
+  elements.castIronFilter.addEventListener('click', () => filterEventHandler(castIronArray, 'Cast Iron'));
+  elements.triplyFilter.addEventListener('click', () => filterEventHandler(triplyArray, '3PLY'));
+  elements.tnsFilter.addEventListener('click', () => filterEventHandler(tnsArray, 'TNS'));
+  elements.stonewareFilter.addEventListener('click', () => filterEventHandler(stonewareArray, 'Stoneware'));
+  elements.mugsFilter.addEventListener('click', () => filterEventHandler(mugArray, 'Mugs'));
+  elements.miscellaneousFilter.addEventListener('click', () => filterEventHandler(miscellaneousArray, 'Miscellaneous'));
+  elements.unassignedFilter.addEventListener('click', () => filterEventHandler(unassignedArray, 'Unassigned'));
+  elements.allFilter.addEventListener('click', () => filterEventHandler(originalArray, 'All'));
+  elements.chambrayFilter.addEventListener('click', () => filterEventHandler(chambrayArray, 'Chambray'));
+  elements.shellPinkFilter.addEventListener('click', () => filterEventHandler(shellPinkArray, 'Shell Pink'));
+  elements.monthlyOffersFilter.addEventListener('click', monthlyOffersFilter);
   elements.alphabeticalSort.addEventListener('click', alphabeticalSort);
   elements.quantitySort.addEventListener('click', quantitySort);
   elements.costSort.addEventListener('click', costSort);
@@ -25,7 +28,8 @@ const elementIds = [
   // Filters
   'castIronFilter', 'triplyFilter', 'tnsFilter', 'stonewareFilter',
   'mugsFilter', 'miscellaneousFilter', 'unassignedFilter', 'allFilter',
-  'alphabeticalSort', 'quantitySort', 'costSort', 'totalCostSort',
+  'alphabeticalSort', 'quantitySort', 'costSort', 'totalCostSort', 
+  'chambrayFilter', 'shellPinkFilter', 'monthlyOffersFilter', 
   // Stats
   'totalQuantityStat', 'totalCostStat', 'avgCostStat', 'castIronPercentage', 
   'triplyPercentage', 'tnsPercentage', 'stonewarePercentage', 'miscellaneousPercentage', 
@@ -51,6 +55,7 @@ let costToggle = false;
 let itemArray = [];
 
 // Hidden arrays which are categorized
+let originalArray = [];
 let itemDateArray = [];
 let lastYearsItemDateArray = [];
 let dayArray = [];
@@ -61,6 +66,9 @@ let stonewareArray = [];
 let miscellaneousArray = [];
 let mugArray = [];
 let unassignedArray = [];
+let chambrayArray = [];
+let shellPinkArray = [];
+let monthlyOffersArray = [];
 
 let pieChart;
 let barChart;
@@ -93,12 +101,7 @@ async function init(){
   // Default 
   alphabeticalSort(false);
 
-  castIronInit();
-  triplyInit();
-  tnsInit();
-  mugsInit();
-  miscellaneousInit();
-  stonewareInit();
+  filterInit();
   unassignedInit()
 
   updateMoneyPercentage();
@@ -205,56 +208,33 @@ function spreadsheetDateParser(spreadsheetData) {
   return tempItemDateArray;
 }
 
+function filterFunction(startsWith = [], includes = []) {
+  const filteredArray = [];
+  // FOR OF instead of forEach
+  for (const item of originalArray) {
+    const lowerCaseItem = item.itemDescription.toLowerCase();
+    if (
+      startsWith.some(keyword => lowerCaseItem.startsWith(keyword)) ||
+      includes.some(keyword => lowerCaseItem.includes(keyword))
+    ) {
+      filteredArray.push(item);
+    }
+  }
+  
+  return filteredArray;
+}
+
 // Initialization of the categories
-function castIronInit() {
+function filterInit() {
   const castIronKeywords = [
     'rnd cass','evo rnd cass','ovl cass','evo shllw','shllw cass', 'evo rect',
     'evo shllw','rect grill','evo saucepan','sq grillit','evo oblong',
     'flower casserole','heart cass 20','heart cass cerise','pumpkin cass','rnd tatin',
     'soup pot'
   ];
-  let newCastIronArray = [];
-  // FOR OF instead of forEach
-  originalArray.forEach(item => {
-    let lowerCaseItem = item.itemDescription.toLowerCase();
-    if (
-      castIronKeywords.some(keyword => lowerCaseItem.startsWith(keyword)) ||
-      lowerCaseItem.includes('skillet') ||
-      lowerCaseItem.includes('balti')
-    ) {
-      newCastIronArray.push(item);
-    }
-  });
-  castIronArray = newCastIronArray;
-  return castIronArray;
-}
-
-
-function triplyInit(){
-  let newTriplyArray = [];
-  originalArray.forEach(item => {
-    let lowerCaseItem = item.itemDescription.toLowerCase();
-    if (lowerCaseItem.includes('3ply')) {
-      newTriplyArray.push(item);
-    }
-  });
-  triplyArray = newTriplyArray;
-  return triplyArray
-}
-
-function tnsInit(){
-  let newTnsArray = [];
-  originalArray.forEach(item => {
-    let lowerCaseItem = item.itemDescription.toLowerCase();
-    if (lowerCaseItem.includes('tns')) {
-      newTnsArray.push(item);
-    }
-  });
-  tnsArray = newTnsArray
-  return tnsArray;
-}
-
-function stonewareInit(){
+  const castIronKeywordsInclude = [
+    'skillet', 'balti'
+  ];
   const stonewareKeywordsStartWith = ['10', '25cm', 'ct ', 'cookie jar', 'gravy', 'heart tart', 
     'honey', 'lc b', 'lc mug', 'lc cappuccino', 'lc espresso', 'lc grand mug', 'lc outlet', 
     'lc petite', 'lc r', 'lc s', 'med stor', 'oil', '300ml pumpkin', '20cm flower dish'
@@ -264,37 +244,10 @@ function stonewareInit(){
     'pet bowl', 'lc van', 'dip bowl', 'pasta bowl', 'rice bowl', 'fusion', 'coffee', 'egg cup', 
     'garlic keeper', 'tea pot', 'spoon rest', 'mixing jug', 'lasagna', 'heart dish', 'mug', 
     'rainbow', 'pie', 'heart plate', 'ramekin', 'mini sauce', 'soup bowl 14', 'stoneware', 'tapas',
-    'teapot', 'camembert', 'fluted fan', 'frill bowl'
+    'teapot', 'camembert', 'fluted fan', 'frill bowl', 'fluted flan'
   ];
-  let newStonewareArray = [];
-  originalArray.forEach(item => {
-    let lowerCaseItem = item.itemDescription.toLowerCase();
-    if (
-      stonewareKeywordsIncludes.some(keyword => lowerCaseItem.includes(keyword)) ||
-      stonewareKeywordsStartWith.some(keyword => lowerCaseItem.startsWith(keyword))
-      ) {
-        newStonewareArray.push(item);
-    }
-  });
-  stonewareArray = newStonewareArray;
-
-  return stonewareArray
-};
-
-function mugsInit(){
   const mugKeywords = ['lc mug', 'lc cappuccino', 'lc espresso', 'lc grand mug'];
-  let newMugsArray = [];
-  originalArray.forEach(item => {
-    let lowerCaseItem = item.itemDescription.toLowerCase();
-    if (mugKeywords.some(keyword => lowerCaseItem.startsWith(keyword))) {
-      newMugsArray.push(item);
-    }
-  });
-  mugArray = newMugsArray;
-  return mugArray
-}
 
-function miscellaneousInit(){
   const miscellaneousKeywordsStartWith = ['class', '30cm', 'ss mixing', 'bak', 'silicone mill', 'sw1'];
   const miscellaneousKeywordsIncludes = ['kettle', 'splatter', 'glass', 'glass', ' ss', 'bottle', 
     'garlic press', 'spoons', 'strainer', 'protector', 'turner', 'mash', 'wire', 'ovw', 'cooler', 
@@ -304,18 +257,19 @@ function miscellaneousInit(){
     'cookie jar santa', 'mini ornaments', 'ladle', 'pasta fork', 'edge spoon', 'edge serving spoon',
     'acacia wood', 'ceramic bkg beans', 'chefs apron', 'slotted spoon', 
   ];
-  let newMiscellaneousArray = [];
-  originalArray.forEach(item => {
-    let lowerCaseItem = item.itemDescription.toLowerCase();
-    if (
-      miscellaneousKeywordsIncludes.some(keyword => lowerCaseItem.includes(keyword)) ||
-      miscellaneousKeywordsStartWith.some(keyword => lowerCaseItem.startsWith(keyword))
-      ) {
-        newMiscellaneousArray.push(item);
-    }
-  });
-  miscellaneousArray = newMiscellaneousArray;
-  return miscellaneousArray
+  const chambrayKeywordsIncludes = ['cham', 'lid cha', '14 cha', 'plates cha', ];
+
+  castIronArray = filterFunction(castIronKeywords, castIronKeywordsInclude);
+  triplyArray = filterFunction([], ['3ply']);
+  tnsArray = filterFunction([], ['tns']);
+  stonewareArray = filterFunction(stonewareKeywordsStartWith, stonewareKeywordsIncludes);
+  mugArray = filterFunction(mugKeywords)
+  miscellaneousArray = filterFunction(miscellaneousKeywordsStartWith, miscellaneousKeywordsIncludes);
+  chambrayArray = filterFunction([], chambrayKeywordsIncludes);
+  shellPinkArray = filterFunction([], ['shell pink']);
+  // monthlyOffersArray = filterFunction();
+  
+  unassignedInit();
 }
 
 function unassignedInit(){
@@ -380,7 +334,6 @@ function createTables() {
 // Clears the table on the screen
 function clearTable() {
   while (elements.tableBody.firstChild) {
-    // remove instead of
     elements.tableBody.removeChild(elements.tableBody.lastChild);
   }
 }
@@ -390,60 +343,22 @@ function clearTable() {
 // Event handler functions
 
 // Event handlers for the filters + sorts
-function castIronFilter (){
+function filterEventHandler (displayedArray, filterTitle){
   clearTable();
-  itemArray = castIronArray;
+  itemArray = displayedArray;
   createTables();
-  elements.filterTitle.textContent = 'Cast Iron';
-}
-// REPETITIVE
-function triplyFilter (){
-  clearTable();
-  itemArray = triplyArray;
-  createTables();
-  elements.filterTitle.textContent = '3PLY';
+  elements.filterTitle.textContent = filterTitle;
 }
 
-function tnsFilter (){
+function sortFunction(toggle, init = true){
   clearTable();
-  itemArray = tnsArray;
-  createTables();
-  elements.filterTitle.textContent = 'TNS';
-}
-
-function stonewareFilter (){
-  clearTable();
-  itemArray = stonewareArray;
-  createTables();
-  elements.filterTitle.textContent = 'Stoneware';
-}
-
-function mugsFilter (){
-  clearTable();
-  itemArray = mugArray;
-  createTables();
-  elements.filterTitle.textContent = 'Mugs';
-}
-
-function miscellaneousFilter (){
-  clearTable();
-  itemArray = miscellaneousArray;
-  createTables();
-  elements.filterTitle.textContent = 'Miscellaneous';
-}
-
-function unassignedFilter (){
-  clearTable();
-  itemArray = unassignedArray;
-  createTables();
-  elements.filterTitle.textContent = 'Unassigned';
-}
-
-function allFilter (){
-  clearTable();
-  itemArray = originalArray;
-  createTables();
-  elements.filterTitle.textContent = 'All';
+  toggle ? itemArray.sort((item1, item2) => (item1.itemDescription < item2.itemDescription) 
+    ? 1 : (item1.itemDescription > item2.itemDescription) 
+    ? -1 : 0) : itemArray.sort((item1, item2) => (item1.itemDescription > item2.itemDescription) 
+    ? 1 : (item1.itemDescription < item2.itemDescription) 
+    ? -1 : 0);
+  init ? createTables() : '';
+  alphabeticalToggle = !alphabeticalToggle;
 }
 
 function alphabeticalSort(init = true){
