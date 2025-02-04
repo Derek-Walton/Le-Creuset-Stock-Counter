@@ -14,11 +14,11 @@ window.onload = function() {
   elements.allFilter.addEventListener('click', () => filterEventHandler(originalArray, 'All'));
   elements.chambrayFilter.addEventListener('click', () => filterEventHandler(chambrayArray, 'Chambray'));
   elements.shellPinkFilter.addEventListener('click', () => filterEventHandler(shellPinkArray, 'Shell Pink'));
-  elements.monthlyOffersFilter.addEventListener('click', monthlyOffersFilter);
-  elements.alphabeticalSort.addEventListener('click', alphabeticalSort);
-  elements.quantitySort.addEventListener('click', quantitySort);
-  elements.costSort.addEventListener('click', costSort);
-  elements.totalCostSort.addEventListener('click', totalCostSort);
+  elements.monthlyOffersFilter.addEventListener('click', () => filterEventHandler(monthlyOffersArray, 'Monthly Offers'));
+  elements.alphabeticalSort.addEventListener('click', () => sortFunction('alphabeticalToggle', 'itemDescription'));
+  elements.quantitySort.addEventListener('click', () => sortFunction('quantityToggle', 'quantity'));
+  elements.costSort.addEventListener('click', () => sortFunction('costToggle', 'unitCost'));
+  elements.totalCostSort.addEventListener('click', () => sortFunction('totalCostToggle', 'totalCost'));
 };
 
 
@@ -46,10 +46,17 @@ for (const id of elementIds) {
 }
 
 // Toggles for sorts
-let alphabeticalToggle = false;
-let quantityToggle = false;
-let totalCostToggle = false;
-let costToggle = false;
+// let alphabeticalToggle = false;
+// let quantityToggle = false;
+// let totalCostToggle = false;
+// let costToggle = false;
+
+let toggles = {
+  alphabeticalToggle: false, 
+  quantityToggle: false, 
+  totalCostToggle: false, 
+  costToggle: false
+};
 
 // Main array which is displayed on screen
 let itemArray = [];
@@ -98,22 +105,23 @@ async function init(){
   barChart ? barChart.destroy() : '';
   originalArray = itemArray;
   
-  // Default 
-  alphabeticalSort(false);
+  // Default sorted view
+  sortFunction('alphabeticalToggle', 'itemDescription', true)
 
   filterInit();
   unassignedInit()
 
-  updateMoneyPercentage();
+  updateRevenueSplit();
 
   createTables();
 }
 
 function clearData(){
-  alphabeticalToggle = false;
-  quantityToggle = false;
-  totalCostToggle = false;
-  costToggle = false;
+  toggles.alphabeticalToggle = false;
+  toggles.quantityToggle = false;
+  toggles.totalCostToggle = false;
+  toggles.costToggle = false;
+
   itemDateArray = [];
   itemArray = [];
   originalArray = [];
@@ -137,25 +145,27 @@ function initObject() {
   
   for (let i = 2; i < spreadsheetSplit.length; i += 5) {
     const itemName = spreadsheetSplit[i];    
+    if (itemName == 'Item Description') {
+      continue
+    }
     const itemPrice = -spreadsheetSplit[i + 3].split('\n')[0];
     const itemTotalPrice = -parseFloat(spreadsheetSplit[i + 3].split('\'')[0]);
     const itemQuantity = -spreadsheetSplit[i + 2];
-    const itemDate = spreadsheetSplit[i + 1];
-    if (itemName != 'Item Description') {
-      if (itemArray.find(item => item.itemDescription == itemName)) {
+    // const itemDate = spreadsheetSplit[i + 1];
+
+      if (itemArray.find(item => item.itemDescription == itemName) && itemName != 'Item Description') {
         const correctItem = itemArray.find(item => item.itemDescription == itemName);
         correctItem.totalCost += itemTotalPrice;
         correctItem.quantity += itemQuantity;
-        correctItem.unitCost = (correctItem.unitCost + itemPrice / 2);
+        correctItem.unitCost = (correctItem.unitCost + (itemPrice / itemQuantity)) / 2;
       } else {
         itemArray.push({ 
           itemDescription: itemName, 
           quantity: itemQuantity, 
-          unitCost: itemPrice, 
+          unitCost: (itemPrice / itemQuantity), 
           totalCost: itemTotalPrice
         })
       }
-    }
   }
   return itemArray;
 }
@@ -267,7 +277,7 @@ function filterInit() {
   miscellaneousArray = filterFunction(miscellaneousKeywordsStartWith, miscellaneousKeywordsIncludes);
   chambrayArray = filterFunction([], chambrayKeywordsIncludes);
   shellPinkArray = filterFunction([], ['shell pink']);
-  // monthlyOffersArray = filterFunction();
+  monthlyOffersArray = filterFunction(['rnd cass 24 chiffon pink', 'tns crepe pan 24 silicone', '3ply pasta pot 20 silicone']);
   
   unassignedInit();
 }
@@ -350,59 +360,18 @@ function filterEventHandler (displayedArray, filterTitle){
   elements.filterTitle.textContent = filterTitle;
 }
 
-function sortFunction(toggle, init = true){
+
+function sortFunction(toggle, whatToSort, init = true){
   clearTable();
-  toggle ? itemArray.sort((item1, item2) => (item1.itemDescription < item2.itemDescription) 
-    ? 1 : (item1.itemDescription > item2.itemDescription) 
-    ? -1 : 0) : itemArray.sort((item1, item2) => (item1.itemDescription > item2.itemDescription) 
-    ? 1 : (item1.itemDescription < item2.itemDescription) 
+  toggles[toggle] ? itemArray.sort((item1, item2) => (item1[whatToSort] < item2[whatToSort]) 
+    ? 1 : (item1[whatToSort] > item2[whatToSort]) 
+    ? -1 : 0) : itemArray.sort((item1, item2) => (item1[whatToSort] > item2[whatToSort]) 
+    ? 1 : (item1[whatToSort] < item2[whatToSort]) 
     ? -1 : 0);
+
   init ? createTables() : '';
-  alphabeticalToggle = !alphabeticalToggle;
-}
-
-function alphabeticalSort(init = true){
-  clearTable();
-  alphabeticalToggle ? itemArray.sort((item1, item2) => (item1.itemDescription < item2.itemDescription) 
-    ? 1 : (item1.itemDescription > item2.itemDescription) 
-    ? -1 : 0) : itemArray.sort((item1, item2) => (item1.itemDescription > item2.itemDescription) 
-    ? 1 : (item1.itemDescription < item2.itemDescription) 
-    ? -1 : 0);
-  init ? createTables() : '';
-  alphabeticalToggle = !alphabeticalToggle;
-}
-
-function quantitySort(){
-  clearTable();
-  quantityToggle ? itemArray.sort((item1, item2) => (item1.quantity < item2.quantity) 
-  ? 1 : (item1.quantity > item2.quantity) 
-  ? -1 : 0) : itemArray.sort((item1, item2) => (item1.quantity > item2.quantity) 
-  ? 1 : (item1.quantity < item2.quantity) 
-  ? -1 : 0);  
-  createTables();
-  quantityToggle = !quantityToggle;
-}
-
-function costSort(){
-  clearTable();
-  costToggle ? itemArray.sort((item1, item2) => (item1.unitCost < item2.unitCost) 
-  ? 1 : (item1.unitCost > item2.unitCost) 
-  ? -1 : 0) : itemArray.sort((item1, item2) => (item1.unitCost > item2.unitCost) 
-  ? 1 : (item1.unitCost < item2.unitCost) 
-  ? -1 : 0);  
-  createTables();
-  costToggle = !costToggle;
-}
-
-function totalCostSort(){
-  clearTable();
-  totalCostToggle ? itemArray.sort((item1, item2) => (item1.totalCost < item2.totalCost) 
-  ? 1 : (item1.totalCost > item2.totalCost) 
-  ? -1 : 0) : itemArray.sort((item1, item2) => (item1.totalCost > item2.totalCost) 
-  ? 1 : (item1.totalCost < item2.totalCost) 
-  ? -1 : 0);  
-  createTables();
-  totalCostToggle = !totalCostToggle;
+  toggles[toggle] = !toggles[toggle];
+  console.log(itemArray);
 }
 
 function dateSort(unsortedItemDateArray){
@@ -519,7 +488,7 @@ function totalSalesPerDate(newItemDateArray) {
   return newItemDateObject;
 }
 
-function updateMoneyPercentage(){
+function updateRevenueSplit(){
   let totalMoney = 0;
   let totalCastIron = 0;
   let totalTriply = 0;
