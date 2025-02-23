@@ -277,7 +277,7 @@ function filterInit() {
   miscellaneousArray = filterFunction(miscellaneousKeywordsStartWith, miscellaneousKeywordsIncludes);
   chambrayArray = filterFunction([], chambrayKeywordsIncludes);
   shellPinkArray = filterFunction([], ['shell pink', 'shell p', 'sh p', 's pink']);
-  monthlyOffersArray = filterFunction(['rnd cass 24 chiffon pink', 'tns crepe pan 24 silicone', '3ply pasta pot 20 silicone']);
+  monthlyOffersArray = filterFunction(['rnd cass 24 shell pink', 'tns crepe pan 24 silicone', '3ply pasta pot 20 silicone']);
   
   unassignedInit();
 }
